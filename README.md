@@ -16,6 +16,12 @@ if (options.exec) child_process.exec(options.exec);
 $ npm install -g pp-finder
 ```
 
+### yarn
+
+```shell
+$ yarn global add pp-finder
+```
+
 ## Getting started
 
 For instance, let's find candidates in the popular express library:
@@ -27,12 +33,27 @@ $ yarn add express
 $ # now write a very basic express application
 ```
 
+```javascript
+const express = require("express");
+
+const app = express();
+const port = 3000;
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
+```
+
 To hunt for prototype pollution gadgets, pp-finder will parse the javascript source code of every file it finds in the provided directory.
 
-It will copy the input directory into a new one with an updated version of the sources.
+It will use the `--experimental-loader` options from nodejs to perform ast modifications on the fly.
 
 ```shell
-$ pp-finder hook ./target/express/node_modules
+$ node --experimental-loader pp-finder ./index.js
 ```
 
 From now, if you run the application, it will output all the available candidates:
