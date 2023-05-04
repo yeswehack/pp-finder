@@ -1,7 +1,7 @@
 {
-  "name": "@pp-finder/cli",
+  "name": "pp-finder",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.cjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/yeswehack/pp-finder.git"
@@ -11,12 +11,10 @@
   "description": "",
   "license": "MIT",
   "scripts": {
-    "build": "tsc && cp -r ./src/agent ./dist/",
+    "build": "bash build.sh",
+    "dev": "bash build.sh -w",
     "test": "mocha test -r ts-node/register 'test/**/*.test.ts'",
     "prepare": "npm run build"
-  },
-  "bin": {
-    "pp-finder": "./dist/index.js"
   },
   "dependencies": {
     "cmd-ts": "^0.11.0",
@@ -30,9 +28,11 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.7.18",
     "mocha": "^10.0.0",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "typescript-json-schema": "^0.56.0",
+    "zod-to-json-schema": "^3.21.0"
   },
   "files": [
-    "./dist/**/*"
+    "./dist/*"
   ]
 }

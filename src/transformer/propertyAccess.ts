@@ -13,7 +13,6 @@ export const propertyAccessTransformer: PPTransformer = (node, utils) => {
     return null;
   }
 
- 
   // Transform
   const newNode = utils.createWrapperCall("prop", node.name, [
     utils.visit(node.expression),

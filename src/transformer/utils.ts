@@ -2,21 +2,26 @@ import ts from "typescript";
 import { PPTransformerUtils } from "../types";
 
 function isAssignation(operator: ts.BinaryOperator): boolean {
-  if (operator === ts.SyntaxKind.EqualsToken) return true;
-  if (operator === ts.SyntaxKind.PlusEqualsToken) return true;
-  if (operator === ts.SyntaxKind.MinusEqualsToken) return true;
-  if (operator === ts.SyntaxKind.AsteriskEqualsToken) return true;
-  if (operator === ts.SyntaxKind.SlashEqualsToken) return true;
-  if (operator === ts.SyntaxKind.PercentEqualsToken) return true;
-  if (operator === ts.SyntaxKind.AmpersandEqualsToken) return true;
-  if (operator === ts.SyntaxKind.BarEqualsToken) return true;
-  if (operator === ts.SyntaxKind.CaretEqualsToken) return true;
-  if (operator === ts.SyntaxKind.LessThanLessThanEqualsToken) return true;
-  if (operator === ts.SyntaxKind.GreaterThanGreaterThanEqualsToken) return true;
-  if (operator === ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken)
-    return true;
-  if (operator === ts.SyntaxKind.AsteriskAsteriskEqualsToken) return true;
-  return false;
+  const assignationTokens = [
+    /*    = */ ts.SyntaxKind.EqualsToken,
+    /*   += */ ts.SyntaxKind.PlusEqualsToken,
+    /*   -= */ ts.SyntaxKind.MinusEqualsToken,
+    /*   *= */ ts.SyntaxKind.AsteriskEqualsToken,
+    /*  **= */ ts.SyntaxKind.AsteriskAsteriskEqualsToken,
+    /*   /= */ ts.SyntaxKind.SlashEqualsToken,
+    /*   %= */ ts.SyntaxKind.PercentEqualsToken,
+    /*  <<= */ ts.SyntaxKind.LessThanLessThanEqualsToken,
+    /*  >>= */ ts.SyntaxKind.GreaterThanGreaterThanEqualsToken,
+    /* >>>= */ ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken,
+    /*   &= */ ts.SyntaxKind.AmpersandEqualsToken,
+    /*  &&= */ ts.SyntaxKind.AmpersandAmpersandEqualsToken,
+    /*   |= */ ts.SyntaxKind.BarEqualsToken,
+    /*  ||= */ ts.SyntaxKind.BarBarEqualsToken,
+    /*  ??= */ ts.SyntaxKind.QuestionQuestionEqualsToken,
+    /*   ^= */ ts.SyntaxKind.CaretEqualsToken,
+  ];
+
+  return assignationTokens.includes(operator);
 }
 
 export function isInAssignation(node: ts.Node): boolean {

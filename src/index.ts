@@ -1,26 +1,40 @@
-#! /usr/bin/env node
-import { run, subcommands } from "cmd-ts";
+import { compile } from "./compiler";
+import agent from "./agent";
+import { loadConfig } from "./config";
 
-import restore from "./cmds/restore";
-import hook from "./cmds/hook";
-import rehook from "./cmds/rehook";
-import purge from "./cmds/purge";
+type Format = "builtin" | "commonjs" | "dynamic" | "json" | "module" | "wasm";
 
-const app = subcommands({
-  name: "PP-Finder",
-  description: "Find prototype pollution gadget in javascript code",
-  cmds: {
-    hook,
-    rehook,
-    restore,
-    purge,
-  },
-});
-
-async function main() {
-  await run(app, process.argv.slice(2));
+interface LoadContext {
+  conditions: string[];
+  format?: Format | null;
+  importAssertions?: Record<string, string>;
 }
 
-if (require.main === module) {
-  main();
+interface LoadReturn {
+  format?: Format | null;
+  shortCircuit?: boolean;
+  source: string | ArrayBuffer;
 }
+
+type LoadHook = (
+  url: string,
+  context: LoadContext,
+  nextLoad: (url: string, context: LoadContext) => Promise<LoadReturn>
+) => Promise<LoadReturn>;
+
+type GlobalPreloadHook = () => string;
+
+const config = loadConfig();
+
+export const load: LoadHook = async function (url, context, nextLoad) {
+  const r = await nextLoad(url, context);
+  if (context.format === "module" && r.source) {
+    r.source = compile(config.wrapperName, url, r.source.toString());
+  }
+  return r;
+};
+
+export const globalPreload: GlobalPreloadHook = function () {
+  const jsonConfig = JSON.stringify(config);
+  return `globalThis.${config.wrapperName}Create = (${agent})(${jsonConfig});`;
+};
