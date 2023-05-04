@@ -15,7 +15,7 @@ import type { ExpressionType, Location, PPFinderConfig } from "./types";
 
 declare function getBuiltin<T>(module: string): T;
 
-export default function (config: PPFinderConfig) {
+export default function (root: string, config: PPFinderConfig) {
   const fs = getBuiltin<typeof _fs>("fs");
   const os = getBuiltin<typeof _os>("os");
   const tty = getBuiltin<typeof _tty>("tty");
@@ -56,7 +56,7 @@ export default function (config: PPFinderConfig) {
   const require = Module.createRequire(process.cwd());
   const {
     compile,
-  } = require(`${process.cwd()}/node_modules/pp-finder/dist/compiler.js`);
+  } = require(`${root}/compiler.js`);
 
   const _require = Module.prototype.require;
   const _wrap = Module.wrap;
