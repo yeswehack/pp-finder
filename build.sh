@@ -30,7 +30,7 @@ function buildFile() {
   distfile="${2}"
   
   path=$(mktemp -d)
-  ncc build -q -t -o "${path}" -e typescript "${entrypoint}"
+  ncc build -q -t -o "${path}" -e typescript -e zod "${entrypoint}"
   mv "${path}/index.js" "${distfile}"
   rmdir "${path}"
 }
