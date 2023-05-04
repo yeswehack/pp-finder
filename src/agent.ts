@@ -86,7 +86,6 @@ export default function (root: string, config: PPFinderConfig) {
   const colorMap = {
     reset: "\x1b[0m",
     PP: "\x1b[34m",
-    Internal: "\x1b[31m",
     Bind: "\x1b[35m",
     Elem: "\x1b[32m",
     ForIn: "\x1b[31m",
@@ -112,7 +111,7 @@ export default function (root: string, config: PPFinderConfig) {
 
   const logged = new Set<string>();
   const logGadget = (
-    expressionType: ExpressionType | "Internal",
+    expressionType: ExpressionType,
     filename: string,
     location?: Location,
     key?: string

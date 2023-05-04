@@ -10,7 +10,6 @@ const config: PPFinderConfig = {
   logFile: "",
   logOnce: false,
   log: {
-    Internal: true,
     ForIn: true,
     IsIn: true,
     Prop: true,

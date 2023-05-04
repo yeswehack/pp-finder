@@ -38,7 +38,6 @@ export const ppFinderConfig = z
         Prop: z.boolean().default(true).describe("Log `x.y` gadgets"),
         Elem: z.boolean().default(true).describe("Log `x[y]` gadgets"),
         Bind: z.boolean().default(true).describe("Log `{y} = x` gadgets"),
-        Internal: z.boolean().default(true).describe("Log internal gadgets"),
       })
       .default({})
       .describe("Define witch gadgets to log"),
