@@ -56,7 +56,7 @@ export default function (config: PPFinderConfig) {
   const require = Module.createRequire(process.cwd());
   const {
     compile,
-  } = require("/home/bitk/ywh/git/public/pp-finder/dist/compiler.js");
+  } = require(`${process.cwd()}/node_modules/pp-finder/dist/compiler.js`);
 
   const _require = Module.prototype.require;
   const _wrap = Module.wrap;
