@@ -24,7 +24,7 @@ const config: PPFinderConfig = {
 function runCode(source: string) {
   const jsonConfig = JSON.stringify(config);
   const code =
-    `globalThis.${config.wrapperName}Create = (${agent})(${jsonConfig});\n` +
+    `globalThis.${config.wrapperName}Create = (${agent})('${__dirname}/../dist', ${jsonConfig});\n` +
     compile(config.wrapperName, "index.js", source);
 
   const output: string[] = [];

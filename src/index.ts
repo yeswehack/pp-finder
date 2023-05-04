@@ -36,5 +36,6 @@ export const load: LoadHook = async function (url, context, nextLoad) {
 
 export const globalPreload: GlobalPreloadHook = function () {
   const jsonConfig = JSON.stringify(config);
-  return `globalThis.${config.wrapperName}Create = (${agent})(${jsonConfig});`;
+  const root = JSON.stringify(__dirname)
+  return `globalThis.${config.wrapperName}Create = (${agent})(${root}, ${jsonConfig});`;
 };
