@@ -138,60 +138,63 @@ You can configure the behaviour of PP finder using env variable:
 
 Tests indicate what the library handles in terms of AST visitors:
 
-```
-❯ yarn run test
-$ mocha test -r ts-node/register 'test/**/*.test.ts'
-
-
+```shell
+$ yarn test
   Hooks
     PropertyAccessExpression
-      ✔ Pollutable     | ({}).y
-      ✔ Not Pollutable | ({y: 42}).y
-      ✔ Not Pollutable | (Object.create(null)).y
-      ✔ Pollutable     | ({y: {}}).y.z
+      ✔️ Valid Gadget     | ({}).y
+      ✔️ Not Valid Gadget | ({y: 42}).y
+      ✔️ Not Valid Gadget | (Object.create(null)).y
+      ✔️ Valid Gadget     | ({y: {}}).y.z
     ElementAccessExpression
-      ✔ Pollutable     | ({})['y']
-      ✔ Not Pollutable | ({y: 42})['y']
-      ✔ Not Pollutable | (Object.create(null))['y']
-      ✔ Pollutable     | ({y: {}})['y']['z']
+      ✔️ Valid Gadget     | ({})['y']
+      ✔️ Not Valid Gadget | ({y: 42})['y']
+      ✔️ Not Valid Gadget | (Object.create(null))['y']
+      ✔️ Valid Gadget     | ({y: {}})['y']['z']
     ForInStatement
-      ✔ Pollutable     | for(let y in ({})){}
-      ✔ Not Pollutable | for(let y in (Object.create(null))){}
+      ✔️ Valid Gadget     | for(let y in ({})){}
+      ✔️ Not Valid Gadget | for(let y in (Object.create(null))){}
     ArrowFunctionDeclaration
-      ✔ Pollutable     | (({y}) => (0))({})
-      ✔ Pollutable     | (({y}, a, {z}) => (0))({}, 0, {})
-      ✔ Pollutable     | (({y: z}) => (0))({})
+      ✔️ Valid Gadget     | (({y}) => (0))({})
+      ✔️ Valid Gadget     | (({y}, a, {z}) => (0))({}, 0, {})
+      ✔️ Valid Gadget     | (({y: z}) => (0))({})
     FunctionDeclaration
-      ✔ Pollutable     | function f({y}){return};f({})
-      ✔ Pollutable     | function f({y}, a, {z}){return};f({}, 42, {})
-      ✔ Pollutable     | function f({y: z}){return};f({})
-      ✔ Pollutable     | function f({['y']: z}){return};f({})
+      ✔️ Valid Gadget     | function f({y}){return};f({})
+      ✔️ Valid Gadget     | function f({y}, a, {z}){return};f({}, 42, {})
+      ✔️ Valid Gadget     | function f({y: z}){return};f({})
+      ✔️ Valid Gadget     | function f({['y']: z}){return};f({})
     FunctionExpression
-      ✔ Pollutable     | (function ({y}){return})({})
-      ✔ Pollutable     | (function ({y}, a, {z}){return})({}, 0, {})
-      ✔ Pollutable     | (function ({y: z}){return})({})
-      ✔ Pollutable     | (function ({['y']: z}){return})({})
+      ✔️ Valid Gadget     | (function ({y}){return})({})
+      ✔️ Valid Gadget     | (function ({y}, a, {z}){return})({}, 0, {})
+      ✔️ Valid Gadget     | (function ({y: z}){return})({})
+      ✔️ Valid Gadget     | (function ({['y']: z}){return})({})
     InExpression
-      ✔ Pollutable     | ("y" in {})
-      ✔ Not Pollutable | ("y" in {y: 42})
-      ✔ Not Pollutable | ("y" in Object.create(null))
+      ✔️ Valid Gadget     | ("y" in {})
+      ✔️ Not Valid Gadget | ("y" in {y: 42})
+      ✔️ Not Valid Gadget | ("y" in Object.create(null))
     ObjectLiteral
-      ✔ Pollutable     | ({y} = {});
-      ✔ Pollutable     | ({y: {z}} = {y: {}});
-      ✔ Not Pollutable | ({y} = {y: 42});
-      ✔ Not Pollutable | ({y} = Object.create(null));
-      ✔ Pollutable     | ({['y']: y} ={});
+      ✔️ Valid Gadget     | ({y} = {});
+      ✔️ Valid Gadget     | ({y: {z}} = {y: {}});
+      ✔️ Not Valid Gadget | ({y} = {y: 42});
+      ✔️ Not Valid Gadget | ({y} = Object.create(null));
+      ✔️ Valid Gadget     | ({['y']: y} ={});
     VariableDeclaration
-      ✔ Pollutable     | const {y} = {};
-      ✔ Pollutable     | const {y} = {}, {z} = {};
-      ✔ Pollutable     | const {y: {z}} = {y: {}};
-      ✔ Not Pollutable | const {y} = {y: 42};
-      ✔ Pollutable     | const {['y']: y} ={};
-      ✔ Not Pollutable | const {y} = Object.create(null);
-      ✔ Pollutable     | let z; const {y} = {z} = {};
+      ✔️ Valid Gadget     | const {y} = {};
+      ✔️ Valid Gadget     | const {y} = {}, {z} = {};
+      ✔️ Valid Gadget     | const {y: {z}} = {y: {}};
+      ✔️ Not Valid Gadget | const {y} = {y: 42};
+      ✔️ Valid Gadget     | const {['y']: y} ={};
+      ✔️ Not Valid Gadget | const {y} = Object.create(null);
+      ✔️ Valid Gadget     | let z; const {y} = {z} = {};
+
+  Assignation check
+    ✔️ const x = {}; x.y = 42; x.y
+    ✔️ const x = {}; x['y'] = 42; x.y
 
 
-  36 passing (124ms)
+  38 passing (72ms)
 
-Done in 2.84s.
+Done in 1.61s.
+
+
 ```
