@@ -1,8 +1,10 @@
-import { PPFinderConfig, ppFinderConfig } from "./types";
 import fs from "fs";
+import { PPFinderConfig, ppFinderConfig } from "./types";
+
+const DEFAULT_PPF_CONFIG_FILE_PATH = "./ppf.config.json";
 
 function readFileConfig() {
-  const configPath = process.env.PPF_CONFIG_PATH || "./ppf.config.json";
+  const configPath = process.env.PPF_CONFIG_PATH || DEFAULT_PPF_CONFIG_FILE_PATH;
   if (!fs.existsSync(configPath)) {
     return Object.create(null);
   }
