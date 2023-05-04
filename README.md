@@ -142,54 +142,54 @@ Tests indicate what the library handles in terms of AST visitors:
 $ yarn test
   Hooks
     PropertyAccessExpression
-      Γ£ö Valid Gadget     | ({}).y
-      Γ£ö Not Valid Gadget | ({y: 42}).y
-      Γ£ö Not Valid Gadget | (Object.create(null)).y
-      Γ£ö Valid Gadget     | ({y: {}}).y.z
+      ✔️ Valid Gadget     | ({}).y
+      ✔️ Not Valid Gadget | ({y: 42}).y
+      ✔️ Not Valid Gadget | (Object.create(null)).y
+      ✔️ Valid Gadget     | ({y: {}}).y.z
     ElementAccessExpression
-      Γ£ö Valid Gadget     | ({})['y']
-      Γ£ö Not Valid Gadget | ({y: 42})['y']
-      Γ£ö Not Valid Gadget | (Object.create(null))['y']
-      Γ£ö Valid Gadget     | ({y: {}})['y']['z']
+      ✔️ Valid Gadget     | ({})['y']
+      ✔️ Not Valid Gadget | ({y: 42})['y']
+      ✔️ Not Valid Gadget | (Object.create(null))['y']
+      ✔️ Valid Gadget     | ({y: {}})['y']['z']
     ForInStatement
-      Γ£ö Valid Gadget     | for(let y in ({})){}
-      Γ£ö Not Valid Gadget | for(let y in (Object.create(null))){}
+      ✔️ Valid Gadget     | for(let y in ({})){}
+      ✔️ Not Valid Gadget | for(let y in (Object.create(null))){}
     ArrowFunctionDeclaration
-      Γ£ö Valid Gadget     | (({y}) => (0))({})
-      Γ£ö Valid Gadget     | (({y}, a, {z}) => (0))({}, 0, {})
-      Γ£ö Valid Gadget     | (({y: z}) => (0))({})
+      ✔️ Valid Gadget     | (({y}) => (0))({})
+      ✔️ Valid Gadget     | (({y}, a, {z}) => (0))({}, 0, {})
+      ✔️ Valid Gadget     | (({y: z}) => (0))({})
     FunctionDeclaration
-      Γ£ö Valid Gadget     | function f({y}){return};f({})
-      Γ£ö Valid Gadget     | function f({y}, a, {z}){return};f({}, 42, {})
-      Γ£ö Valid Gadget     | function f({y: z}){return};f({})
-      Γ£ö Valid Gadget     | function f({['y']: z}){return};f({})
+      ✔️ Valid Gadget     | function f({y}){return};f({})
+      ✔️ Valid Gadget     | function f({y}, a, {z}){return};f({}, 42, {})
+      ✔️ Valid Gadget     | function f({y: z}){return};f({})
+      ✔️ Valid Gadget     | function f({['y']: z}){return};f({})
     FunctionExpression
-      Γ£ö Valid Gadget     | (function ({y}){return})({})
-      Γ£ö Valid Gadget     | (function ({y}, a, {z}){return})({}, 0, {})
-      Γ£ö Valid Gadget     | (function ({y: z}){return})({})
-      Γ£ö Valid Gadget     | (function ({['y']: z}){return})({})
+      ✔️ Valid Gadget     | (function ({y}){return})({})
+      ✔️ Valid Gadget     | (function ({y}, a, {z}){return})({}, 0, {})
+      ✔️ Valid Gadget     | (function ({y: z}){return})({})
+      ✔️ Valid Gadget     | (function ({['y']: z}){return})({})
     InExpression
-      Γ£ö Valid Gadget     | ("y" in {})
-      Γ£ö Not Valid Gadget | ("y" in {y: 42})
-      Γ£ö Not Valid Gadget | ("y" in Object.create(null))
+      ✔️ Valid Gadget     | ("y" in {})
+      ✔️ Not Valid Gadget | ("y" in {y: 42})
+      ✔️ Not Valid Gadget | ("y" in Object.create(null))
     ObjectLiteral
-      Γ£ö Valid Gadget     | ({y} = {});
-      Γ£ö Valid Gadget     | ({y: {z}} = {y: {}});
-      Γ£ö Not Valid Gadget | ({y} = {y: 42});
-      Γ£ö Not Valid Gadget | ({y} = Object.create(null));
-      Γ£ö Valid Gadget     | ({['y']: y} ={});
+      ✔️ Valid Gadget     | ({y} = {});
+      ✔️ Valid Gadget     | ({y: {z}} = {y: {}});
+      ✔️ Not Valid Gadget | ({y} = {y: 42});
+      ✔️ Not Valid Gadget | ({y} = Object.create(null));
+      ✔️ Valid Gadget     | ({['y']: y} ={});
     VariableDeclaration
-      Γ£ö Valid Gadget     | const {y} = {};
-      Γ£ö Valid Gadget     | const {y} = {}, {z} = {};
-      Γ£ö Valid Gadget     | const {y: {z}} = {y: {}};
-      Γ£ö Not Valid Gadget | const {y} = {y: 42};
-      Γ£ö Valid Gadget     | const {['y']: y} ={};
-      Γ£ö Not Valid Gadget | const {y} = Object.create(null);
-      Γ£ö Valid Gadget     | let z; const {y} = {z} = {};
+      ✔️ Valid Gadget     | const {y} = {};
+      ✔️ Valid Gadget     | const {y} = {}, {z} = {};
+      ✔️ Valid Gadget     | const {y: {z}} = {y: {}};
+      ✔️ Not Valid Gadget | const {y} = {y: 42};
+      ✔️ Valid Gadget     | const {['y']: y} ={};
+      ✔️ Not Valid Gadget | const {y} = Object.create(null);
+      ✔️ Valid Gadget     | let z; const {y} = {z} = {};
 
   Assignation check
-    Γ£ö const x = {}; x.y = 42; x.y
-    Γ£ö const x = {}; x['y'] = 42; x.y
+    ✔️ const x = {}; x.y = 42; x.y
+    ✔️ const x = {}; x['y'] = 42; x.y
 
 
   38 passing (72ms)
