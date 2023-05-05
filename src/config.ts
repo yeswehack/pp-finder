@@ -37,6 +37,10 @@ function loadEnvConfig(config: PPFinderConfig) {
     config.logOnce = parseBool(process.env.PPF_LOGONCE);
   }
 
+  if (process.env.PPF_USECACHE) {
+    config.useCache = parseBool(process.env.PPF_USECACHE);
+  }
+
   if (process.env.PPF_WRAPPER_NAME) {
     config.wrapperName = process.env.PPF_WRAPPER_NAME;
   }

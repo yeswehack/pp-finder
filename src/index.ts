@@ -1,5 +1,5 @@
-import { compile } from "./compiler";
 import agent from "./agent";
+import { compile } from "./compiler";
 import { loadConfig } from "./config";
 
 type Format = "builtin" | "commonjs" | "dynamic" | "json" | "module" | "wasm";
@@ -29,7 +29,7 @@ const config = loadConfig();
 export const load: LoadHook = async function (url, context, nextLoad) {
   const r = await nextLoad(url, context);
   if (context.format === "module" && r.source) {
-    r.source = compile(config.wrapperName, url, r.source.toString());
+    r.source = compile(config, url, r.source.toString());
   }
   return r;
 };

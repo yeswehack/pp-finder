@@ -1,11 +1,22 @@
 import ts from "typescript";
+import Cache from './cache';
 import { transformers } from "./transformer";
-import { PPTransformerUtils } from "./types";
+import { PPFinderConfig, PPTransformerUtils } from "./types";
 
-export function compile(wrapperName: string, filename: string, source: string) {
+export function compile(config: PPFinderConfig, filename: string, source: string) {
+  const { wrapperName } = config;
+
   if (source.startsWith("#!")) {
-    source = "//" + source ;
+    source = "//" + source;
   }
+
+  const cache = new Cache(config);
+
+  if (config.useCache) {
+    const found = cache.get(source);
+    if (found) return found;
+  }
+
   const tree = ts.createSourceFile(
     "",
     source,
@@ -17,7 +28,7 @@ export function compile(wrapperName: string, filename: string, source: string) {
   const printer = ts.createPrinter();
   const transformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
     const utils: PPTransformerUtils = {
-      wrapperName: wrapperName,
+      wrapperName,
       visit<T extends ts.Node>(node: T) {
         return ts.visitNode<T>(node, visit);
       },
@@ -55,5 +66,11 @@ export function compile(wrapperName: string, filename: string, source: string) {
   const prefix = `const ${wrapperName} = globalThis.${wrapperName}Create('${filename}'); `;
   const code = transformedTree.transformed.map((n) => printer.printFile(n));
 
-  return prefix + code.join("\n");
+  const compiledSource = prefix + code.join("\n");
+
+  if (config.useCache) {
+    cache.store(source, compiledSource);
+  }
+
+  return compiledSource
 }

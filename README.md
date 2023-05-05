@@ -142,18 +142,19 @@ FLAGS:
 
 You can configure the behaviour of PP finder using env variable:
 
-| Environment      | Type                        | Description                                            |
-| :--------------- | :-------------------------- | :----------------------------------------------------- |
-| PPF_CONFIG_PATH  | string                      | Path to config file, defaults to `./ppf.config.json`   |
-| PPF_LOGONCE      | bool                        | Only log each finding once, defaults to `false`        |
-| PPF_COLOR        | 'auto', 'always' or 'never' | Disable colorization, defaults to `false`              |
-| PPF_WRAPPER_NAME | string                      | Wrapper name, defaults to `ø`                          |
-| PPF_POLLUTABLE   | string[], comma separated   | Pollutable objects, defaults to `["Object.prototype"]` |
-| PPF_LOG_FORIN    | bool                        | Log `for (y in x)` gadgets, defaults to `true`         |
-| PPF_LOG_ISIN     | bool                        | Log `y in x` gadgets, defaults to `true`               |
-| PPF_LOG_PROP     | bool                        | Log `x.y` gadgets, defaults to `true`                  |
-| PPF_LOG_ELEM     | bool                        | Log `x[y]` gadgets, defaults to `true`                 |
-| PPF_LOG_BIND     | bool                        | Log `{y} = x` gadgets, defaults to `true`              |
+| Environment      | Type                        | Description                                                 |
+| :--------------- | :-------------------------- | :---------------------------------------------------------- |
+| PPF_CONFIG_PATH  | string                      | Path to config file, defaults to `./ppf.config.json`        |
+| PPF_LOGONCE      | bool                        | Only log each finding once, defaults to `false`             |
+| PPF_USECACHE     | bool                        | Whenether to use cache for the compiler, defaults to `true` |
+| PPF_COLOR        | 'auto', 'always' or 'never' | Disable colorization, defaults to `false`                   |
+| PPF_WRAPPER_NAME | string                      | Wrapper name, defaults to `ø`                               |
+| PPF_POLLUTABLE   | string[], comma separated   | Pollutable objects, defaults to `["Object.prototype"]`      |
+| PPF_LOG_FORIN    | bool                        | Log `for (y in x)` gadgets, defaults to `true`              |
+| PPF_LOG_ISIN     | bool                        | Log `y in x` gadgets, defaults to `true`                    |
+| PPF_LOG_PROP     | bool                        | Log `x.y` gadgets, defaults to `true`                       |
+| PPF_LOG_ELEM     | bool                        | Log `x[y]` gadgets, defaults to `true`                      |
+| PPF_LOG_BIND     | bool                        | Log `{y} = x` gadgets, defaults to `true`                   |
 
 ## Tests
 

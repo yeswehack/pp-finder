@@ -10,7 +10,6 @@ import type _os from "os";
 import type _path from "path";
 import type _process from "process";
 import type _tty from "tty";
-import type _util from "util";
 import type { ExpressionType, Location, PPFinderConfig } from "./types";
 
 declare function getBuiltin<T>(module: string): T;
@@ -68,13 +67,13 @@ export default function (root: string, config: PPFinderConfig) {
     }
     const relativePath = path.relative(process.cwd(), path.join(this.path, id));
     Module.wrap = function (script: string) {
-      return _wrap(compile(config.wrapperName, relativePath, script));
+      return _wrap(compile(config, relativePath, script));
     };
     return _require.apply(this, [id]);
   };
 
   Module.wrap = function (script: string) {
-    return _wrap(compile(config.wrapperName, process.argv[1], script));
+    return _wrap(compile(config, process.argv[1], script));
   };
 
   Module.prototype.require = Object.assign(

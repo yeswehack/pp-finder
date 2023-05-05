@@ -27,6 +27,10 @@ export const ppFinderConfig = z
       .boolean()
       .default(false)
       .describe("Whether to log each gadget once or not"),
+    useCache: z
+      .boolean()
+      .default(true)
+      .describe("Whether to use cache in the compiler"),
     color: z
       .enum(["auto", "always", "never"])
       .default("auto")

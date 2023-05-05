@@ -1,13 +1,14 @@
 import assert from "assert";
 import { describe, it } from "mocha";
-import { compile } from "../src/compiler";
-import agent from "../src/agent";
 import vm from "node:vm";
+import agent from "../src/agent";
+import { compile } from "../src/compiler";
 import { PPFinderConfig } from "../src/types";
 
 const config: PPFinderConfig = {
   color: "never",
   logFile: "",
+  useCache: false,
   logOnce: false,
   log: {
     ForIn: true,
@@ -24,7 +25,7 @@ function runCode(source: string) {
   const jsonConfig = JSON.stringify(config);
   const code =
     `globalThis.${config.wrapperName}Create = (${agent})('${__dirname}/../dist', ${jsonConfig});\n` +
-    compile(config.wrapperName, "index.js", source);
+    compile(config, "index.js", source);
 
   const output: string[] = [];
   const fakeConsole = {
