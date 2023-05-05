@@ -5,7 +5,7 @@ import { PPFinderConfig } from "./types";
 
 export default class Cache {
     cacheDir: string;
-    hashAlgorithm: string = 'sha256';
+    hashAlgorithm: string = 'md5';
     extension: string = "cache";
     config: PPFinderConfig;
 
