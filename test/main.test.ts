@@ -23,8 +23,8 @@ const config: PPFinderConfig = {
 function runCode(source: string) {
   const jsonConfig = JSON.stringify(config);
   const code =
-    `globalThis.${config.wrapperName}Create = (${agent})('${__dirname}/../dist', ${jsonConfig});\n` +
-    compile(config.wrapperName, "index.js", source);
+    `globalThis.${config.wrapperName} = (${agent})('${__dirname}/../dist', ${jsonConfig});\n` +
+    compile(config.wrapperName,  source);
 
   const output: string[] = [];
   const fakeConsole = {
@@ -35,7 +35,7 @@ function runCode(source: string) {
   const context: any = { getBuiltin: require, console: fakeConsole };
   vm.createContext(context);
   const result = vm.runInContext(code, context);
-  const logs = output.map((log) => log.split(" index.js:")[0]);
+  const logs = output.map((log) => log.split(" evalmachine.<anonymous>:")[0]);
 
   return { result, logs };
 }

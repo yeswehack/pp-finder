@@ -29,13 +29,13 @@ const config = loadConfig();
 export const load: LoadHook = async function (url, context, nextLoad) {
   const r = await nextLoad(url, context);
   if (context.format === "module" && r.source) {
-    r.source = compile(config.wrapperName, url, r.source.toString());
+    r.source = compile(config.wrapperName, r.source.toString());
   }
   return r;
 };
 
 export const globalPreload: GlobalPreloadHook = function () {
   const jsonConfig = JSON.stringify(config);
-  const root = JSON.stringify(__dirname)
-  return `globalThis.${config.wrapperName}Create = (${agent})(${root}, ${jsonConfig});`;
+  const root = JSON.stringify(__dirname);
+  return `globalThis.${config.wrapperName} = (${agent})(${root}, ${jsonConfig});`;
 };

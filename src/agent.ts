@@ -54,27 +54,36 @@ export default function (root: string, config: PPFinderConfig) {
   }
 
   const require = Module.createRequire(process.cwd());
-  const {
-    compile,
-  } = require(`${root}/compiler.js`);
+  const { compile } = require(`${root}/compiler.js`);
 
   const _require = Module.prototype.require;
   const _wrap = Module.wrap;
+
+  function getPath() {
+    const stack = new Error().stack as string;
+    const line = stack.split("\n")[4];
+
+    if (line.endsWith(")")){
+      return line.match(/\((.*):\d+:\d+\)/)![1];
+    } else {
+      return line.match(/at (.*):\d+:\d+/)![1];
+    }
+  }
 
   // Modify the require function to compile the module before loading it
   const ppfRequire = function (this: _module, id: string) {
     if (Module.builtinModules.includes(id)) {
       return _require.apply(this, [id]);
     }
-    const relativePath = path.relative(process.cwd(), path.join(this.path, id));
+
     Module.wrap = function (script: string) {
-      return _wrap(compile(config.wrapperName, relativePath, script));
+      return _wrap(compile(config.wrapperName, script));
     };
     return _require.apply(this, [id]);
   };
 
   Module.wrap = function (script: string) {
-    return _wrap(compile(config.wrapperName, process.argv[1], script));
+    return _wrap(compile(config.wrapperName, script));
   };
 
   Module.prototype.require = Object.assign(
@@ -112,15 +121,14 @@ export default function (root: string, config: PPFinderConfig) {
   const logged = new Set<string>();
   const logGadget = (
     expressionType: ExpressionType,
-    filename: string,
-    location?: Location,
+    location: Location,
     key?: string
   ) => {
     if (!config.log[expressionType]) return;
 
-    const fullLoc = location
-      ? `${filename}:${location[0]}:${location[1]}`
-      : filename;
+    const fullLoc =
+      path.relative(process.cwd(), getPath()) +
+      `:${location[0]}:${location[1]}`;
     const gadget = expressionType + (key ? ` ${key}` : "");
 
     const msg = `${format(expressionType, gadget, "[]")} ${fullLoc}`;
@@ -131,48 +139,46 @@ export default function (root: string, config: PPFinderConfig) {
 
   /* #endregion */
 
-  return (filename: string) => {
-    return {
-      prop(target: any, key: PropertyKey, loc: Location) {
-        if (canBePolluted(target, key)) {
-          logGadget("Prop", filename, loc, key.toString());
-        }
-        return target;
-      },
-      elem(target: any, key: PropertyKey, loc: Location) {
-        if (canBePolluted(target, key)) {
-          logGadget("Elem", filename, loc, key.toString());
-        }
-        return (target as any)[key];
-      },
-      forIn(target: any, loc: Location) {
-        if (canBePolluted(target)) {
-          logGadget("ForIn", filename, loc);
-        }
-        return target;
-      },
-      isIn(target: any, key: PropertyKey, loc: Location) {
-        if (canBePolluted(target, key) && key !== void 0) {
-          logGadget("IsIn", filename, loc, key.toString());
-        }
-        return key in target;
-      },
-      bind(target: any, keyList: PropertyKey[][], loc: Location) {
-        for (const keys of keyList) {
-          let t = target;
-          const path = [];
-          for (const key of keys) {
-            if (canBePolluted(t, key)) {
-              logGadget("Bind", filename, loc, [...path, key].join("."));
-              break;
-            } else {
-              t = target[key];
-              path.push(key);
-            }
+  return {
+    prop(target: any, key: PropertyKey, loc: Location) {
+      if (canBePolluted(target, key)) {
+        logGadget("Prop", loc, key.toString());
+      }
+      return target;
+    },
+    elem(target: any, key: PropertyKey, loc: Location) {
+      if (canBePolluted(target, key)) {
+        logGadget("Elem", loc, key.toString());
+      }
+      return (target as any)[key];
+    },
+    forIn(target: any, loc: Location) {
+      if (canBePolluted(target)) {
+        logGadget("ForIn", loc);
+      }
+      return target;
+    },
+    isIn(target: any, key: PropertyKey, loc: Location) {
+      if (canBePolluted(target, key) && key !== void 0) {
+        logGadget("IsIn", loc, key.toString());
+      }
+      return key in target;
+    },
+    bind(target: any, keyList: PropertyKey[][], loc: Location) {
+      for (const keys of keyList) {
+        let t = target;
+        const path = [];
+        for (const key of keys) {
+          if (canBePolluted(t, key)) {
+            logGadget("Bind", loc, [...path, key].join("."));
+            break;
+          } else {
+            t = target[key];
+            path.push(key);
           }
         }
-        return target;
-      },
-    };
+      }
+      return target;
+    },
   };
 }

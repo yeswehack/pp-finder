@@ -2,9 +2,9 @@ import ts from "typescript";
 import { transformers } from "./transformer";
 import { PPTransformerUtils } from "./types";
 
-export function compile(wrapperName: string, filename: string, source: string) {
+export function compile(wrapperName: string, source: string) {
   if (source.startsWith("#!")) {
-    source = "//" + source ;
+    source = "//" + source;
   }
   const tree = ts.createSourceFile(
     "",
@@ -52,8 +52,7 @@ export function compile(wrapperName: string, filename: string, source: string) {
 
   const transformedTree = ts.transform(tree, [transformer]);
 
-  const prefix = `const ${wrapperName} = globalThis.${wrapperName}Create('${filename}'); `;
   const code = transformedTree.transformed.map((n) => printer.printFile(n));
 
-  return prefix + code.join("\n");
+  return code.join("\n");
 }
