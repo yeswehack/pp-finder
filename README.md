@@ -80,64 +80,6 @@ Now, if you issue a request to that server, even more candidate show up:
 [...]
 ```
 
-## Commands
-
-### Hook
-
-Add pp-finder hooks to a file or directory.
-
-This will create a backup of each file in ~/.local/share/pp-finder
-
-```shell
-$ pp-finder hook --help                                                                                                                                                                              PP-Finder hook
-> Instrument a javascript project
-
-ARGUMENTS:
-  <Path> - Path of the file or directory to instrument
-
-OPTIONS:
-  --name, -n <str> - Wrapper name, (default "ø") [optional]
-
-FLAGS:
-  --help, -h - show help
-```
-
-Hook a file or directory,
-
-### Restore
-
-Restore the backup (if available) for a file or directory
-
-```shell
-PP-Finder restore
-> Remove pp-finder hooks from a javascript file or directory
-
-ARGUMENTS:
-  <Path> - Path of the file or directory to restore
-
-FLAGS:
-  --help, -h - show help
-```
-
-### Rehoook
-
-This is moslty for developement purpose, restore and rehook a file / directory
-
-### Purge
-
-Remove all backups
-
-```
-PP-Finder purge
-> Purge all backups
-
-ARGUMENTS:
-  [path] - Path of the file or directory to remove from the backup [optional]
-
-FLAGS:
-  --help, -h - show help
-```
-
 ## Runtime Configuration
 
 You can configure the behaviour of PP finder using env variable:
