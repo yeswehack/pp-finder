@@ -49,6 +49,7 @@ function buildAll() {
 
   echo -n "Building"
   (buildFile "src/index.ts" "./dist/index.cjs" && echo -n .) &
+  (buildFile "src/cli.ts" "./dist/cli.cjs" && echo -n .) &
   (buildFile "src/compiler.ts" "./dist/compiler.js" && echo -n .) &
   (buildSchema && echo -n .) &
   wait

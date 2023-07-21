@@ -49,6 +49,7 @@ export const ppFinderConfig = z
       .array(z.string())
       .default(["Object.prototype"])
       .describe("Pollutable objects"),
+    browser: z.boolean().default(false).describe("Whether to compile for browser instead of node")
   })
   .default({})
   .describe("PP Finder configuration file");

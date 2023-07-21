@@ -64,6 +64,9 @@ function loadEnvConfig(config: PPFinderConfig) {
   if (process.env.PPF_POLLUTABLE) {
     config.pollutable = process.env.PPF_POLLUTABLE.split(",");
   }
+  if (process.env.PPF_BROWSER) {
+    config.browser = parseBool(process.env.PPF_BROWSER);
+  }
   return config;
 }
 
