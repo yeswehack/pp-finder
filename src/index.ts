@@ -28,8 +28,6 @@ const config = loadConfig();
 
 export const load: LoadHook = async function (url, context, nextLoad) {
   const r = await nextLoad(url, context);
-  console.log(context.format);
-  console.log(r.source);
   if (context.format === "module" && r.source) {
     r.source = compile(config.wrapperName, r.source.toString());
   }
@@ -39,5 +37,5 @@ export const load: LoadHook = async function (url, context, nextLoad) {
 export const globalPreload: GlobalPreloadHook = function () {
   const jsonConfig = JSON.stringify(config);
   const root = JSON.stringify(__dirname);
-  return `globalThis.${config.wrapperName} = (${agent})(${root}, ${jsonConfig});`;
+  return `globalThis.${config.wrapperName} = (${agent})(${root}, ${jsonConfig}, true);`;
 };

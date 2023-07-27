@@ -54,25 +54,22 @@ export default command({
             fileData += chunk;
         }
 
+        config.browser = browser;
         const jsonConfig = JSON.stringify(config);
-
-        let compiledSource = ""
-
-        if (browser) {
-            compiledSource += `const getBuiltin = (${getBuiltinBrowser});`;
-        } else {
-            compiledSource += `const getBuiltin = (${getBuiltinNode});`;
-        }
 
         const root = JSON.stringify(path.join(__dirname, ".."));
 
-        compiledSource += `const ${wrapperName} = (${agent})(${root}, ${jsonConfig}, false);`
-        compiledSource += '\n\n\n';
+        const globalKey = browser ? "window" : "globalThis";
+
+        let compiledSource = ""
+
+        compiledSource += `${globalKey}.getBuiltin = (${browser ? getBuiltinBrowser : getBuiltinNode});`;
+        compiledSource += `${globalKey}.${wrapperName} = (${agent})(${root}, ${jsonConfig}, false);`
+        compiledSource += '\n'.repeat(3);
         compiledSource += compile(wrapperName, fileData);
 
-
         if (!outputFilePath) {
-            console.log(compiledSource);
+            process.stdout.write(compiledSource);
             return
         }
 

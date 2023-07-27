@@ -26,15 +26,15 @@ export default function (root: string, config: PPFinderConfig, hookRequire?: boo
     const stack = new Error().stack as string;
     const line = stack.split("\n")[4];
 
+    if (config.browser) {
+      return line.match(/\@(.*):\d+:\d+/)![1];
+    }
+
     let p = ""
     if (line.endsWith(")")) {
       p = line.match(/\((.*):\d+:\d+\)/)![1];
     } else {
       p = line.match(/at (.*):\d+:\d+/)![1];
-    }
-
-    if (path) {
-      return path.resolve(p);
     }
 
     return p;
@@ -67,6 +67,7 @@ export default function (root: string, config: PPFinderConfig, hookRequire?: boo
     if (!Module || !process) {
       return;
     }
+
 
     const require = Module.createRequire(process.cwd());
     const { compile } = require(`${root}/compiler.js`);
@@ -178,7 +179,7 @@ export default function (root: string, config: PPFinderConfig, hookRequire?: boo
 
     let base = ""
     if (!config.browser && path && process) {
-      base = path.resolve(path.relative(process.cwd(), getPath()))
+      base = path.relative(process.cwd(), getPath())
     } else {
       base = getPath();
     }
