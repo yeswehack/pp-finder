@@ -43,8 +43,14 @@ export default command({
             defaultValue: () => false,
             description: "Compile the provided file for the browser",
         }),
+        reportUrl: option({
+            type: optional(string),
+            long: "report-url",
+            short: "u",
+            description: 'Which url to print in the output (required for the burp extension)',
+        })
     },
-    async handler({ file: filePath, wrapperName, output: outputFilePath, browser }) {
+    async handler({ file: filePath, wrapperName, output: outputFilePath, browser, reportUrl }) {
         const input = filePath === "-" ? process.stdin : createReadStream(filePath);
 
         input.setEncoding("utf-8");
@@ -63,6 +69,7 @@ export default command({
 
         let compiledSource = ""
 
+        compiledSource += `${globalKey}.reportUrl = ("${reportUrl}");`;
         compiledSource += `${globalKey}.getBuiltin = (${browser ? getBuiltinBrowser : getBuiltinNode});`;
         compiledSource += `${globalKey}.${wrapperName} = (${agent})(${root}, ${jsonConfig}, false);`
         compiledSource += '\n'.repeat(3);

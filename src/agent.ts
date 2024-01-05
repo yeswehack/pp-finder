@@ -12,6 +12,7 @@ import type _process from "process";
 import type _tty from "tty";
 import type { ExpressionType, Location, PPFinderConfig } from "./types";
 
+declare var reportUrl: string;
 declare function getBuiltin<T>(module: string): T | null;
 
 export default function (root: string, config: PPFinderConfig, hookRequire?: boolean) {
@@ -184,12 +185,22 @@ export default function (root: string, config: PPFinderConfig, hookRequire?: boo
       base = getPath();
     }
 
+    const locInfo = `${location[0]}:${location[1]}`;
+
     const fullLoc =
       "\t" + base +
-      `:${location[0]}:${location[1]}`;
+      `:${locInfo}`;
     const gadget = expressionType + (key ? ` ${key}` : "");
 
-    const msg = `${format(expressionType, gadget, "[]")}${fullLoc}`;
+    const reportUrlParsed = new URL(reportUrl);
+
+    reportUrlParsed.searchParams.set("url", base);
+    reportUrlParsed.searchParams.set("location", locInfo);
+    reportUrlParsed.searchParams.set("gadget", gadget);
+    reportUrlParsed.searchParams.set("expressionType", expressionType);
+
+    const msg = `${format(expressionType, gadget, "[]")}${fullLoc} ${config.browser ? reportUrlParsed : ""}`;
+
     if (config.logOnce && logged.has(msg)) return;
     logged.add(msg);
     log(msg);
