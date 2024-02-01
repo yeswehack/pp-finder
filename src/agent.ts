@@ -187,9 +187,7 @@ export default function (root: string, config: PPFinderConfig, hookRequire?: boo
 
     const locInfo = `${location[0]}:${location[1]}`;
 
-    const fullLoc =
-      "\t" + base +
-      `:${locInfo}`;
+    const fullLoc = `${base}:${locInfo}`;
     const gadget = expressionType + (key ? ` ${key}` : "");
 
     const reportUrlParsed = new URL(reportUrl);
@@ -203,7 +201,14 @@ export default function (root: string, config: PPFinderConfig, hookRequire?: boo
 
     if (config.logOnce && logged.has(msg)) return;
     logged.add(msg);
-    log(msg);
+
+    if (!config.browser) log(msg);
+    else {
+      console.groupCollapsed(`[PP][${expressionType.padStart(5, ' ')}] '${key}' ${base}`)
+      console.log(fullLoc);
+      console.log(reportUrlParsed.toString());
+      console.groupEnd();
+    }
   };
 
   /* #endregion */
