@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="net.portswigger.burp.extensions.montoya.api" type="repository">
+    <properties maven-id="net.portswigger.burp.extensions:montoya-api:2023.6" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/portswigger/burp/extensions/montoya-api/2023.6/montoya-api-2023.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -50,7 +50,7 @@ app.listen(port, () => {
 
 To hunt for prototype pollution gadgets, pp-finder will parse the javascript source code of every file it finds in the provided directory.
 
-It will use the `--experimental-loader` options from nodejs to perform ast modifications on the fly.
+It will use the `--experimental-loader` options from nodejs to perform ast modifications on the fly (Tested with node v18.18.2).
 
 ```shell
 $ node --experimental-loader pp-finder ./index.js

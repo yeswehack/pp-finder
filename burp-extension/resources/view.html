@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PPFinder - Observe javascript file</title>
+    <link rel="stylesheet" data-name="vs/editor/editor.main"
+        href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
+</head>
+
+<body>
+    <div id="container" style="height:100vh;"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+
+    <script>
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        const $container = $('#container');
+
+        function loadEditor(text, loc, gadget, expressionType) {
+            require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+
+            require(["vs/editor/editor.main"], () => {
+                const editor = monaco.editor.create($container, {
+                    value: text,
+                    language: 'javascript',
+                    theme: 'vs-dark',
+                });
+
+
+                const tokens = loc.split(":")
+                const lineNumber = parseInt(tokens[0]);
+                const column = parseInt(tokens[1]);
+
+                console.log({ gadget, expressionType })
+
+
+                editor.setPosition({ column, lineNumber });
+                editor.setSelection(new monaco.Selection(lineNumber, column, lineNumber, column + 5));
+                editor.focus();
+            });
+        }
+
+        function parseParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            const location = urlParams.get("location");
+            const url = urlParams.get('url');
+            const gadget = urlParams.get('gadget');
+            const expressionType = urlParams.get('expressionType');
+
+            return { location, url, gadget, expressionType };
+        }
+
+        function getTargetDownloadUrl() {
+            const downloadUrl = new URL(window.location.toString().replace("/view", "/download-file"));
+
+            for (const item of Array.from(downloadUrl.searchParams)) {
+                const key = item[0];
+                if (key !== 'url') {
+                    downloadUrl.searchParams.delete(key);
+                }
+            }
+
+            return downloadUrl.toString();
+        }
+
+        async function main() {
+            const { location, url, gadget, expressionType } = parseParams();
+
+            const targetUrl = getTargetDownloadUrl();
+
+            const response = await fetch(targetUrl);
+            const text = await response.text();
+
+            if (text == "not found") {
+                return alert("Could not find file");
+            }
+
+            loadEditor(text, location, gadget, expressionType);
+        }
+
+        window.addEventListener('DOMContentLoaded', main);
+
+    </script>
+
+</body>
+
+</html>
