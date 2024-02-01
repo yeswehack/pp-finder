@@ -7,7 +7,7 @@ import java.io.FileWriter
 import java.nio.file.Files
 
 class Settings (private var logging: Logging) {
-    private var userNodePath: String = "node";
+    var nodePath: String = "node";
     var ppFinderPath: String = "";
 
     fun loadPpFinder() {
@@ -23,12 +23,51 @@ class Settings (private var logging: Logging) {
         this.ppFinderPath = tempFile.toString();
     }
 
-//    fun main() {
-//        val nodeJSBinary = findNodeJSBinary()
-//        if (nodeJSBinary != null) {
-//            println("Node.js binary found at: $nodeJSBinary")
-//        } else {
-//            println("Node.js binary not found.")
-//        }
-//    }
+    fun loadNode() {
+        val found = findNodeJsBinary()
+        val nodeJsBinary = findNodeJsBinary()
+
+        if (nodeJsBinary != null) {
+            nodePath = nodeJsBinary
+        } else {
+            nodePath = "node"
+            if (getOsName() == "win") nodePath += ".exe";
+        }
+    }
+
+    private fun getOsName(): String {
+       return System.getProperty("os.name").lowercase()
+    }
+
+    private fun findNodeJsBinary(): String? {
+        val osName = getOsName()
+
+        return when {
+            osName.contains("nix") || osName.contains("nux") || osName.contains("mac") -> {
+                findNodeJsBinaryUnix()
+            }
+            osName.contains("win") -> {
+                findNodeJsBinaryWindows()
+            }
+            else -> {
+                null // Unsupported operating system
+            }
+        }
+    }
+
+    private fun findNodeJsBinaryUnix(): String? {
+        val possiblePaths = listOf("/usr/bin/node", "/usr/local/bin/node", "/opt/nodejs/bin/node")
+
+        return possiblePaths.firstOrNull { File(it).exists() }
+    }
+
+    private fun findNodeJsBinaryWindows(): String? {
+        val systemRoot = System.getenv("SystemRoot") ?: "C:\\Windows"
+        val possiblePaths = listOf(
+            File("${systemRoot}\\System32\\node.exe"),
+            File("${systemRoot}\\SysWow64\\node.exe")
+        )
+
+        return possiblePaths.firstOrNull { it.exists() }?.absolutePath
+    }
 }

@@ -2,7 +2,6 @@ package burp;
 
 import burp.api.montoya.BurpExtension
 import burp.api.montoya.MontoyaApi
-import java.awt.Button
 
 //Burp will auto-detect and load any class that extends BurpExtension.
 @Suppress("unused")
@@ -14,9 +13,10 @@ class PPFinder : BurpExtension {
 
         val settings = Settings(api.logging())
         settings.loadPpFinder()
+        settings.loadNode()
 
         val fileMatcher = CompilableFileMatcher(api.logging());
 
-        api.proxy().registerResponseHandler(JavascriptFileProxyHandler(api, fileMatcher, settings))
+        api.proxy().registerResponseHandler(JavascriptFileProxyResponseHandler(api, fileMatcher, settings))
     }
 }

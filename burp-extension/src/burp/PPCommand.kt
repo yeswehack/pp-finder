@@ -44,13 +44,14 @@ class PPCommand(
                 reportUrl
             )
 
+        api.logging().logToOutput("Cmd: $cmd")
+
         val process: Process = Runtime.getRuntime().exec(cmd.toTypedArray());
 
         val stdoutFuture = CompletableFuture.supplyAsync {
             readStream(process.inputStream)
         }
 
-        // Create a CompletableFuture to read from stderr asynchronously
         val stderrFuture = CompletableFuture.supplyAsync {
             readStream(process.errorStream)
         }

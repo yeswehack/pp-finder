@@ -11,7 +11,7 @@ import burp.api.montoya.proxy.http.ProxyResponseToBeSentAction
 import java.net.URL
 
 
-class JavascriptFileProxyHandler(
+class JavascriptFileProxyResponseHandler(
     private var api: MontoyaApi,
     private var fileMatcher: CompilableFileMatcher,
     private var settings: Settings
@@ -19,7 +19,7 @@ class JavascriptFileProxyHandler(
     private var logging: Logging = this.api.logging();
 
     private fun ppFinder(source: List<Byte>, filename: String, reportUrl: String): String? {
-        return PPCommand(api, Constants.NODE_PATH, settings.ppFinderPath).pp(source, filename, reportUrl);
+        return PPCommand(api, settings.nodePath, settings.ppFinderPath).pp(source, filename, reportUrl);
     }
 
     private fun getReportUrl(compiledFileUrl: String): String {
@@ -38,7 +38,6 @@ class JavascriptFileProxyHandler(
 
         val initialRequest = response.initiatingRequest();
 
-        logging.logToOutput("Initial request path: ${initialRequest.path()}")
         if (initialRequest.path().startsWith(Constants.BASE_REQUEST_HANDLER_PATH)) {
             return ProxyResponseToBeSentAction.continueWith(RequestHandler(api, initialRequest, response).process());
         }
