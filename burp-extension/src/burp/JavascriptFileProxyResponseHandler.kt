@@ -34,11 +34,12 @@ class JavascriptFileProxyResponseHandler(
 
     override fun handleResponseToBeSent(response: InterceptedResponse?): ProxyResponseToBeSentAction {
         val contentTypeHeader = response?.headers()?.find { it.name().lowercase() == "content-type" }
+
         val contentType = contentTypeHeader?.value() ?: return ProxyResponseToBeSentAction.continueWith(response);
 
         val initialRequest = response.initiatingRequest();
-
-        if (initialRequest.path().startsWith(Constants.BASE_REQUEST_HANDLER_PATH)) {
+        val hostHeader = initialRequest?.headers()?.find { it.name().lowercase() == "host" }?.value()
+        if (initialRequest.path().startsWith(Constants.BASE_REQUEST_HANDLER_PATH) && hostHeader == "burp") {
             return ProxyResponseToBeSentAction.continueWith(RequestHandler(api, initialRequest, response).process());
         }
 
