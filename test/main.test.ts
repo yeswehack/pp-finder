@@ -65,11 +65,27 @@ describe("Hooks", () => {
     pollutionTest(`({y: {}}).y.z`, ["[PP][Prop z]"]);
   });
 
+  describe("PropertyAccessChain", () => {
+    pollutionTest(`({})?.y`, ["[PP][Prop y]"]);
+    pollutionTest(`({y: 42})?.y`);
+    pollutionTest(`(Object.create(null))?.y`);
+    pollutionTest(`({y: {}})?.y?.z`, ["[PP][Prop z]"]);
+    pollutionTest(`(undefined)?.y?.z`);
+  });
+
   describe("ElementAccessExpression", () => {
     pollutionTest("({})['y']", ["[PP][Elem y]"]);
     pollutionTest("({y: 42})['y']");
     pollutionTest("(Object.create(null))['y']");
     pollutionTest("({y: {}})['y']['z']", ["[PP][Elem z]"]);
+  });
+
+  describe("ElementAccessChain", () => {
+    pollutionTest("({})?.['y']", ["[PP][Elem y]"]);
+    pollutionTest("({y: 42})?.['y']");
+    pollutionTest("(Object.create(null))?.['y']");
+    pollutionTest("({y: {}})?.['y']?.['z']", ["[PP][Elem z]"]);
+    pollutionTest("(undefined)?.['y']?.['z']");
   });
 
   describe("ForInStatement", () => {

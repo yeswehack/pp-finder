@@ -82,13 +82,13 @@ export const elementAccessTransformer: PPTransformer = (node, utils) => {
                 requireBind
                   ? ts.factory.createCallExpression(
                       ts.factory.createPropertyAccessExpression(
-                        ts.factory.createElementAccessExpression(k, v),
+                        ts.factory.createElementAccessChain(k, ts.factory.createToken(ts.SyntaxKind.QuestionDotToken), v),
                         ts.factory.createIdentifier("bind")
                       ),
                       undefined,
                       [k]
                     )
-                  : ts.factory.createElementAccessExpression(k, v)
+                  : ts.factory.createElementAccessChain(k, ts.factory.createToken(ts.SyntaxKind.QuestionDotToken), v)
               ),
             ],
             true

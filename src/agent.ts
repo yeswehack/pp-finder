@@ -150,7 +150,7 @@ export default function (root: string, config: PPFinderConfig) {
       if (canBePolluted(target, key)) {
         logGadget("Elem", loc, key.toString());
       }
-      return (target as any)[key];
+      return (target as any)?.[key];
     },
     forIn(target: any, loc: Location) {
       if (canBePolluted(target)) {

@@ -19,11 +19,16 @@ export const propertyAccessTransformer: PPTransformer = (node, utils) => {
     ts.factory.createStringLiteral(node.name.text),
   ]);
 
-  return ts.factory.updatePropertyAccessExpression(
-    node,
-    newNode,
-    utils.visit(node.name)
-  );
+  if (ts.isPropertyAccessChain(node)) {
+    return ts.factory.updatePropertyAccessChain(
+      node,
+      newNode,
+      node.questionDotToken,
+      utils.visit(node.name)
+    );
+  }
+
+  return ts.factory.updatePropertyAccessExpression(node, newNode, utils.visit(node.name));
 };
 
 export default propertyAccessTransformer;
