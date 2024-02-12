@@ -142,13 +142,13 @@ export default function (root: string, config: PPFinderConfig) {
   return {
     prop(target: any, key: PropertyKey, loc: Location) {
       if (canBePolluted(target, key)) {
-        logGadget("Prop", loc, key.toString());
+        logGadget("Prop", loc, String(key));
       }
       return target;
     },
     elem(target: any, key: PropertyKey, loc: Location) {
       if (canBePolluted(target, key)) {
-        logGadget("Elem", loc, key.toString());
+        logGadget("Elem", loc, String(key));
       }
       return (target as any)?.[key];
     },
@@ -160,7 +160,7 @@ export default function (root: string, config: PPFinderConfig) {
     },
     isIn(target: any, key: PropertyKey, loc: Location) {
       if (canBePolluted(target, key) && key !== void 0) {
-        logGadget("IsIn", loc, key.toString());
+        logGadget("IsIn", loc, String(key));
       }
       return key in target;
     },
@@ -170,7 +170,7 @@ export default function (root: string, config: PPFinderConfig) {
         const path = [];
         for (const key of keys) {
           if (canBePolluted(t, key)) {
-            logGadget("Bind", loc, [...path, key].join("."));
+            logGadget("Bind", loc, [...path, String(key)].join("."));
             break;
           } else {
             t = target[key];
