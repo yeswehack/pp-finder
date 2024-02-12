@@ -13,7 +13,7 @@ class RequestHandler (private val api: MontoyaApi, private val initialRequest: H
         val classLoader = Settings::class.java.classLoader
         val resourceStream = classLoader.getResourceAsStream("view.html")
         val content = resourceStream?.bufferedReader().use { it?.readText() }
-        return initialResponse.withBody(content).withStatusCode(200)
+        return initialResponse.withBody(content).withUpdatedHeader(HttpHeader.httpHeader("Content-Type", "text/html")).withStatusCode(200)
     }
 
     private fun handleDownloadFile(url: URL): HttpResponse {

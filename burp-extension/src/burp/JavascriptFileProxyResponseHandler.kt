@@ -14,7 +14,8 @@ import java.net.URL
 class JavascriptFileProxyResponseHandler(
     private var api: MontoyaApi,
     private var fileMatcher: CompilableFileMatcher,
-    private var settings: Settings
+    private var settings: Settings,
+    private var shittyServerPort: Int
 ) : ProxyResponseHandler {
     private var logging: Logging = this.api.logging();
 
@@ -23,9 +24,7 @@ class JavascriptFileProxyResponseHandler(
     }
 
     private fun getReportUrl(compiledFileUrl: String): String {
-        val url = URL(compiledFileUrl)
-        val updatedUrl = URL(url.protocol, url.host, url.port, "${Constants.BASE_REQUEST_HANDLER_PATH}/view?url=$compiledFileUrl")
-        return updatedUrl.toString()
+        return "http://127.0.0.1:$shittyServerPort${Constants.BASE_REQUEST_HANDLER_PATH}/view?url=$compiledFileUrl"
     }
 
     override fun handleResponseReceived(response: InterceptedResponse?): ProxyResponseReceivedAction {
@@ -37,10 +36,6 @@ class JavascriptFileProxyResponseHandler(
         val contentType = contentTypeHeader?.value() ?: return ProxyResponseToBeSentAction.continueWith(response);
 
         val initialRequest = response.initiatingRequest();
-
-        if (initialRequest.path().startsWith(Constants.BASE_REQUEST_HANDLER_PATH)) {
-            return ProxyResponseToBeSentAction.continueWith(RequestHandler(api, initialRequest, response).process());
-        }
 
         val match = this.fileMatcher.match(contentType, initialRequest, this.api.scope());
         if (!match) {

@@ -24,7 +24,6 @@ class Settings (private var logging: Logging) {
     }
 
     fun loadNode() {
-        val found = findNodeJsBinary()
         val nodeJsBinary = findNodeJsBinary()
 
         if (nodeJsBinary != null) {

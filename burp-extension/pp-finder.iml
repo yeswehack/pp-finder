@@ -14,5 +14,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
     <orderEntry type="library" name="net.portswigger.burp.extensions.montoya.api" level="project" />
+    <orderEntry type="library" name="sun.net.httpserver.http" level="project" />
+    <orderEntry type="library" name="nanohttpd" level="project" />
   </component>
 </module>

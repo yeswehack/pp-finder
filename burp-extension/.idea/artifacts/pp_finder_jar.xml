@@ -9,6 +9,9 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jetbrains/annotations/13.0/annotations-13.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-jdk7/1.9.0/kotlin-stdlib-jdk7-1.9.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/net/portswigger/burp/extender/burp-extender-api/2.3/burp-extender-api-2.3.jar" path-in-jar="/" />
+      <element id="library" level="project" name="net.portswigger.burp.extensions.montoya.api" />
+      <element id="library" level="project" name="KotlinJavaRuntime" />
+      <element id="library" level="project" name="nanohttpd" />
     </root>
   </artifact>
 </component>
