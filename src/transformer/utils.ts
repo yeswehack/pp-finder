@@ -67,17 +67,14 @@ export function* iterBindingPatternPath(
     }
 
     if (ts.isComputedPropertyName(elem.propertyName)) {
-      yield ts.factory.createArrayLiteralExpression([
-        ...path,
-        elem.propertyName.expression,
-      ]);
+      yield ts.factory.createArrayLiteralExpression([...path, elem.propertyName.expression]);
     }
   }
 }
 
 export function replaceParams(
   node: ts.FunctionDeclaration | ts.ArrowFunction | ts.FunctionExpression,
-  utils: PPTransformerUtils
+  { config, createWrapperCall }: PPTransformerUtils
 ) {
   const newParameters: ts.ParameterDeclaration[] = [];
   const newDeclarations: ts.VariableDeclaration[] = [];
@@ -86,22 +83,19 @@ export function replaceParams(
     if (ts.isObjectBindingPattern(param.name)) {
       const paths = Array.from(iterBindingPatternPath(param.name));
 
-      const name = `${utils.wrapperName}_${newDeclarations.length}`;
+      const name = `${config.wrapperName}_${newDeclarations.length}`;
 
       const identifier = ts.factory.createIdentifier(name);
 
-      const newNode = utils.createWrapperCall("bind", param, [
+      const newNode = createWrapperCall(
+        "bind",
+        param,
         identifier,
-        ts.factory.createArrayLiteralExpression(paths),
-      ]);
+        ts.factory.createArrayLiteralExpression(paths)
+      );
 
       newDeclarations.push(
-        ts.factory.createVariableDeclaration(
-          param.name,
-          undefined,
-          undefined,
-          newNode
-        )
+        ts.factory.createVariableDeclaration(param.name, undefined, undefined, newNode)
       );
 
       newParameters.push(
@@ -125,10 +119,7 @@ export function replaceParams(
     newStatements.push(
       ts.factory.createVariableStatement(
         undefined,
-        ts.factory.createVariableDeclarationList(
-          newDeclarations,
-          ts.NodeFlags.Let
-        )
+        ts.factory.createVariableDeclarationList(newDeclarations, ts.NodeFlags.Let)
       )
     );
   }

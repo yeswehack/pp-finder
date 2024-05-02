@@ -1,0 +1,5 @@
+[PP][bind] y at ./test/tests/functionExpression.test.js:1:12
+[PP][bind] y at ./test/tests/functionExpression.test.js:4:12
+[PP][bind] z at ./test/tests/functionExpression.test.js:4:22
+[PP][bind] y at ./test/tests/functionExpression.test.js:7:12
+[PP][bind] y at ./test/tests/functionExpression.test.js:10:12

@@ -9,9 +9,7 @@ export const forInStatementTransformer: PPTransformer = (node, utils) => {
   }
 
   // Transform
-  const newNode = utils.createWrapperCall("forIn", node.expression, [
-    utils.visit(node.expression),
-  ]);
+  const newNode = utils.createWrapperCall("forIn", node.expression, utils.visit(node.expression));
 
   return ts.factory.updateForInStatement(
     node,

@@ -1,57 +1,46 @@
-import ts from "typescript";
-import { z } from "zod";
+import type ts from "typescript";
 
-export type Location = [number, number];
+export const OPS_NAME = ["forIn", "isIn", "prop", "elem", "bind", "call"] as const;
+export type PPFOp = (typeof OPS_NAME)[number];
 
-export type ExpressionType = "ForIn" | "IsIn" | "Prop" | "Elem" | "Bind";
+export const AGENT_NAMES = ["node", "loader", "browser"] as const;
+export type PPFAgentName = (typeof AGENT_NAMES)[number];
 
-export type PPTransformer = (
-  node: ts.Node,
-  utils: PPTransformerUtils
-) => ts.Node | null;
+export interface PPFConfig {
+  logOnce: boolean;
+  wrapperName: string;
+  color: "auto" | "always" | "never";
+  lazyStart: boolean;
+  log: {
+    ForIn: boolean;
+    IsIn: boolean;
+    Prop: boolean;
+    Elem: boolean;
+    Bind: boolean;
+  };
+  logFile: string;
+  pollutables: string[];
+  agent: PPFAgentName;
+  root: string;
+}
+
+export type PPFLogger = (opts: {
+  op: PPFOp;
+  key?: string;
+  path: string;
+  pos: [number, number];
+}) => void;
+
+export type PPFAgent = (context: PPFConfig) => PPFLogger;
+
+export type PPTransformer = (node: ts.Node, utils: PPTransformerUtils) => ts.Node | null;
 
 export type PPTransformerUtils = {
-  wrapperName: string;
+  config: PPFConfig;
   visit: <U extends ts.Node>(n: U) => U;
   createWrapperCall: (
-    name: string,
+    name: "forIn" | "call" | "isIn" | "prop" | "elem" | "bind" | "elem_a" | "elem_b",
     target: ts.Node,
-    params: ts.Expression[]
+    ...args: ts.Expression[]
   ) => ts.CallExpression;
 };
-
-export const ppFinderConfig = z
-  .object({
-    wrapperName: z.string().default("ø").describe("Wrapper name"),
-    logOnce: z
-      .boolean()
-      .default(false)
-      .describe("Whether to log each gadget once or not"),
-    color: z
-      .enum(["auto", "always", "never"])
-      .default("auto")
-      .describe("Whether to colorize the output or not"),
-    log: z
-      .object({
-        ForIn: z.boolean().default(true).describe("Log `for (y in x)` gadgets"),
-        IsIn: z.boolean().default(true).describe("Log `y in x` gadgets"),
-        Prop: z.boolean().default(true).describe("Log `x.y` gadgets"),
-        Elem: z.boolean().default(true).describe("Log `x[y]` gadgets"),
-        Bind: z.boolean().default(true).describe("Log `{y} = x` gadgets"),
-      })
-      .default({})
-      .describe("Define witch gadgets to log"),
-    logFile: z
-      .string()
-      .default("")
-      .describe("File to log gadgets to"),
-    pollutable: z
-      .array(z.string())
-      .default(["Object.prototype"])
-      .describe("Pollutable objects"),
-    browser: z.boolean().default(false).describe("Whether to compile for browser instead of node")
-  })
-  .default({})
-  .describe("PP Finder configuration file");
-
-export type PPFinderConfig = z.infer<typeof ppFinderConfig>;

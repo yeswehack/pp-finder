@@ -1,77 +1,122 @@
-import fs from "fs";
-import { PPFinderConfig, ppFinderConfig } from "./types";
+import { z } from "zod";
+import { PPFConfig, AGENT_NAMES } from "./types";
+import { existsSync, readFileSync } from "fs";
 
-const DEFAULT_PPF_CONFIG_FILE_PATH = "./ppf.config.json";
+type PPFPartialConfig = Partial<Omit<PPFConfig, "log" | "root">> & {
+  log?: Partial<PPFConfig["log"]>;
+};
 
-function readFileConfig() {
-  const configPath = process.env.PPF_CONFIG_PATH || DEFAULT_PPF_CONFIG_FILE_PATH;
-  if (!fs.existsSync(configPath)) {
-    return Object.create(null);
+export const jsonParser = z
+  .object({
+    logOnce: z.boolean().default(false).describe("Whether to log each gadget once or not"),
+    wrapperName: z.string().default("ø").describe("Wrapper name"),
+    color: z
+      .enum(["auto", "always", "never"])
+      .default("auto")
+      .describe("Whether to colorize the output or not"),
+    lazyStart: z.boolean().default(false).describe('Whether to wait for "pp-finder start" or not'),
+    log: z
+      .object({
+        ForIn: z.boolean().default(true).describe("Log `for (y in x)` gadgets"),
+        IsIn: z.boolean().default(true).describe("Log `y in x` gadgets"),
+        Prop: z.boolean().default(true).describe("Log `x.y` gadgets"),
+        Elem: z.boolean().default(true).describe("Log `x[y]` gadgets"),
+        Bind: z.boolean().default(true).describe("Log `{y} = x` gadgets"),
+      })
+      .default({})
+      .describe("Define witch gadgets to log"),
+    logFile: z.string().default("").describe("File to log gadgets to"),
+    pollutables: z.array(z.string()).default(["Object"]).describe("Pollutable objects"),
+    agent: z.enum(AGENT_NAMES).default("loader").describe("Agent to use"),
+    root: z.string().default(""),
+  })
+  .default({})
+  .describe("PP Finder configuration file");
+
+const coerceBoolean = z
+  .enum(["0", "1", "true", "false"])
+  .catch("false")
+  .transform((value) => value == "true" || value == "1");
+
+const envParser = z
+  .object({
+    PPF_WRAPPER_NAME: z.string(),
+    PPF_LOGONCE: coerceBoolean,
+    PPF_COLOR: z.enum(["auto", "always", "never"]),
+    PPF_LAZYSTART: coerceBoolean,
+    PPF_LOG_FORIN: coerceBoolean,
+    PPF_LOG_ISIN: coerceBoolean,
+    PPF_LOG_PROP: coerceBoolean,
+    PPF_LOG_ELEM: coerceBoolean,
+    PPF_LOG_BIND: coerceBoolean,
+    PPF_LOGFILE: z.string(),
+    PPF_POLLUTABLES: z.string(),
+    PPF_AGENT: z.enum(AGENT_NAMES),
+  })
+  .partial()
+  .transform(
+    (env): PPFPartialConfig => ({
+      wrapperName: env.PPF_WRAPPER_NAME,
+      logOnce: env.PPF_LOGONCE,
+      color: env.PPF_COLOR,
+      lazyStart: env.PPF_LAZYSTART,
+      log: {
+        ForIn: env.PPF_LOG_FORIN,
+        IsIn: env.PPF_LOG_ISIN,
+        Prop: env.PPF_LOG_PROP,
+        Elem: env.PPF_LOG_ELEM,
+        Bind: env.PPF_LOG_BIND,
+      },
+      logFile: env.PPF_LOGFILE,
+      pollutables: env.PPF_POLLUTABLES?.split(","),
+      agent: env.PPF_AGENT,
+    })
+  );
+
+function loadFileConfig(filename: string): PPFPartialConfig {
+  if (existsSync(filename) === false) {
+    return jsonParser.parse({});
   }
-  const content = fs.readFileSync(configPath, "utf8");
-  if (!content.trim()) {
-    return Object.create(null);
-  }
 
-  const config = JSON.parse(content);
-  Object.setPrototypeOf(config, null);
-  return config;
+  try {
+    const content = readFileSync(filename, "utf-8");
+    const config = jsonParser.parse(JSON.parse(content));
+    return config;
+  } catch (e) {
+    console.error(`Error loading config from ${filename}: ${e}`);
+    return jsonParser.parse({});
+  }
 }
 
-function parseBool(env: string) {
-  const s = env.toLowerCase().trim();
-  if (["no", "false", "0"].includes(s)) return false;
-  return true;
+function mergeConfigs(...configs: PPFPartialConfig[]): PPFConfig {
+  return configs.reduce<PPFConfig>((acc, config) => {
+    return {
+      agent: config.agent ?? acc.agent,
+      color: config.color ?? acc.color,
+      lazyStart: config.lazyStart ?? acc.lazyStart,
+      log: {
+        ForIn: config.log?.ForIn ?? acc.log.ForIn,
+        IsIn: config.log?.IsIn ?? acc.log.IsIn,
+        Prop: config.log?.Prop ?? acc.log.Prop,
+        Elem: config.log?.Elem ?? acc.log.Elem,
+        Bind: config.log?.Bind ?? acc.log.Bind,
+      },
+      logFile: config.logFile ?? acc.logFile,
+      logOnce: config.logOnce ?? acc.logOnce,
+      pollutables: config.pollutables ?? acc.pollutables,
+      wrapperName: config.wrapperName ?? acc.wrapperName,
+
+      root: "",
+    };
+  }, defaultConfig);
 }
-
-function isValidColorOption(
-  env: string | undefined
-): env is PPFinderConfig["color"] {
-  if (!env) return false;
-  if (["auto", "always", "never"].includes(env)) return true;
-  return false;
-}
-
-function loadEnvConfig(config: PPFinderConfig) {
-  if (process.env.PPF_LOGONCE) {
-    config.logOnce = parseBool(process.env.PPF_LOGONCE);
-  }
-
-  if (process.env.PPF_WRAPPER_NAME) {
-    config.wrapperName = process.env.PPF_WRAPPER_NAME;
-  }
-  if (isValidColorOption(process.env.PPF_COLOR)) {
-    config.color = process.env.PPF_COLOR;
-  }
-  if (process.env.PPF_LOG_FORIN) {
-    config.log.ForIn = parseBool(process.env.PPF_LOG_FORIN);
-  }
-  if (process.env.PPF_LOG_ISIN) {
-    config.log.IsIn = parseBool(process.env.PPF_LOG_ISIN);
-  }
-  if (process.env.PPF_LOG_PROP) {
-    config.log.Prop = parseBool(process.env.PPF_LOG_PROP);
-  }
-  if (process.env.PPF_LOG_ELEM) {
-    config.log.Elem = parseBool(process.env.PPF_LOG_ELEM);
-  }
-  if (process.env.PPF_LOG_BIND) {
-    config.log.Bind = parseBool(process.env.PPF_LOG_BIND);
-  }
-  if (process.env.PPF_LOGFILE) {
-    config.logFile = process.env.PPF_LOGFILE;
-  }
-  if (process.env.PPF_POLLUTABLE) {
-    config.pollutable = process.env.PPF_POLLUTABLE.split(",");
-  }
-  if (process.env.PPF_BROWSER) {
-    config.browser = parseBool(process.env.PPF_BROWSER);
-  }
-  return config;
-}
-
+ 
+export const defaultConfig: PPFConfig = jsonParser.parse({});
 export function loadConfig() {
-  const fileConfig = readFileConfig();
-  const config = loadEnvConfig(ppFinderConfig.parse(fileConfig));
-  return config;
+  const filename = process.env.PPF_CONFIG_FILE || "pp-finder.json";
+
+  const fileConfig = loadFileConfig(filename);
+  const envConfig = envParser.parse(process.env);
+
+  return mergeConfigs(fileConfig, envConfig);
 }

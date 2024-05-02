@@ -14,16 +14,14 @@ export const propertyAccessTransformer: PPTransformer = (node, utils) => {
   }
 
   // Transform
-  const newNode = utils.createWrapperCall("prop", node.name, [
+  const newNode = utils.createWrapperCall(
+    "prop",
+    node.name,
     utils.visit(node.expression),
-    ts.factory.createStringLiteral(node.name.text),
-  ]);
-
-  return ts.factory.updatePropertyAccessExpression(
-    node,
-    newNode,
-    utils.visit(node.name)
+    ts.factory.createStringLiteral(node.name.text)
   );
+
+  return ts.factory.updatePropertyAccessExpression(node, newNode, utils.visit(node.name));
 };
 
 export default propertyAccessTransformer;

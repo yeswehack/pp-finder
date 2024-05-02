@@ -15,10 +15,12 @@ export const variableDeclarationTransformer: PPTransformer = (node, utils) => {
 
   // Transform
   const paths = Array.from(iterBindingPatternPath(node.name));
-  const newNode = utils.createWrapperCall("bind", node.initializer, [
+  const newNode = utils.createWrapperCall(
+    "bind",
+    node.initializer,
     utils.visit(node.initializer),
-    ts.factory.createArrayLiteralExpression(paths),
-  ]);
+    ts.factory.createArrayLiteralExpression(paths)
+  );
 
   return ts.factory.updateVariableDeclaration(
     node,

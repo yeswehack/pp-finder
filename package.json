@@ -1,6 +1,7 @@
 {
   "name": "pp-finder",
   "version": "2.0.0",
+  "packageManager": "yarn@4.1.1",
   "main": "dist/index.cjs",
   "repository": {
     "type": "git",
@@ -11,10 +12,10 @@
   "description": "",
   "license": "MIT",
   "scripts": {
-    "build": "bash build.sh",
-    "dev": "bash build.sh -w",
-    "test": "mocha test -r ts-node/register 'test/**/*.test.ts'",
-    "prepare": "npm run build"
+    "build": "make all -j 4",
+    "dev": "make watch -j 4",
+    "test": "make test -j 4",
+    "prepare": "make all -j 4"
   },
   "dependencies": {
     "@oclif/core": "^2.9.4",

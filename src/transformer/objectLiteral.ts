@@ -40,25 +40,21 @@ export const objectLiteralTransformer: PPTransformer = (node, utils) => {
           ]);
         }
       }
-      
-      if (
-        ts.isPropertyAssignment(prop) &&
-        ts.isComputedPropertyName(prop.name)
-      ) {
-        yield ts.factory.createArrayLiteralExpression([
-          ...path,
-          prop.name.expression,
-        ]);
+
+      if (ts.isPropertyAssignment(prop) && ts.isComputedPropertyName(prop.name)) {
+        yield ts.factory.createArrayLiteralExpression([...path, prop.name.expression]);
       }
     }
   }
 
   const paths = Array.from(iterPaths(node.left));
 
-  const newNode = utils.createWrapperCall("bind", node.right, [
+  const newNode = utils.createWrapperCall(
+    "bind",
+    node.right,
     utils.visit(node.right),
-    ts.factory.createArrayLiteralExpression(paths),
-  ]);
+    ts.factory.createArrayLiteralExpression(paths)
+  );
 
   return ts.factory.updateBinaryExpression(
     node,

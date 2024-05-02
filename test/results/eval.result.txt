@@ -1,0 +1,14 @@
+[PP][call] eval at ./test/tests/eval.test.js:2:1
+[PP][prop] a at eval at call (<preload>:75:28), <anonymous>:1:6
+[PP][call] eval at ./test/tests/eval.test.js:3:13
+42
+[PP][call] Function at ./test/tests/eval.test.js:4:1
+[PP][prop] c at eval at call (<preload>:75:28), <anonymous>:1:13
+[PP][call] Function at ./test/tests/eval.test.js:5:1
+[PP][prop] d at ./test/tests/eval.test.js:5:27
+[PP][prop] constructor at ./test/tests/eval.test.js:6:3
+[PP][call] Function at ./test/tests/eval.test.js:6:1
+[PP][prop] e at ./test/tests/eval.test.js:6:44
+[PP][call] eval at ./test/tests/eval.test.js:8:1
+[PP][call] Function at eval at call (<preload>:75:28), <anonymous>:1:1
+[PP][prop] f at eval at call (<preload>:75:28), <anonymous>:1:6

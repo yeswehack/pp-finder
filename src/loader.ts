@@ -1,4 +1,4 @@
-import agent from "./agent";
+import agents from "./agents";
 import { compile } from "./compiler";
 import { loadConfig } from "./config";
 
@@ -29,13 +29,16 @@ const config = loadConfig();
 export const load: LoadHook = async function (url, context, nextLoad) {
   const r = await nextLoad(url, context);
   if (context.format === "module" && r.source) {
-    r.source = compile(config.wrapperName, r.source.toString());
+    r.source = compile(config, r.source.toString());
   }
   return r;
 };
 
 export const globalPreload: GlobalPreloadHook = function () {
-  const jsonConfig = JSON.stringify(config);
-  const root = JSON.stringify(__dirname);
-  return `globalThis.${config.wrapperName} = (${agent})(${root}, ${jsonConfig}, true);`;
+  config.root = __dirname;
+  const context = JSON.stringify(config);
+  const agent = agents[config.agent];
+  return (
+    `globalThis.${config.wrapperName} = (${agents.setup})(${context}, ${agent});`
+  );
 };

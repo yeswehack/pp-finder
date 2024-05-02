@@ -1,27 +1,21 @@
 import ts from "typescript";
 import { transformers } from "./transformer";
-import { PPTransformerUtils } from "./types";
+import { PPFConfig, PPTransformerUtils } from "./types";
 
-export function compile(wrapperName: string, source: string) {
+export function compile(context: PPFConfig, source: string) {
   if (source.startsWith("#!")) {
     source = "//" + source;
   }
-  const tree = ts.createSourceFile(
-    "",
-    source,
-    ts.ScriptTarget.ESNext,
-    true,
-    ts.ScriptKind.JS
-  );
+  const tree = ts.createSourceFile("", source, ts.ScriptTarget.ESNext, true, ts.ScriptKind.JS);
 
   const printer = ts.createPrinter();
-  const transformer: ts.TransformerFactory<ts.SourceFile> = (context) => {
+  const transformer: ts.TransformerFactory<ts.SourceFile> = (ctx) => {
     const utils: PPTransformerUtils = {
-      wrapperName: wrapperName,
+      config: context,
       visit<T extends ts.Node>(node: T) {
         return ts.visitNode<T>(node, visit);
       },
-      createWrapperCall(name, target, params) {
+      createWrapperCall(name, target, ...params) {
         const pos = ts.getLineAndCharacterOfPosition(tree, target.getStart());
         const posArray = ts.factory.createArrayLiteralExpression([
           ts.factory.createNumericLiteral(pos.line + 1),
@@ -29,7 +23,7 @@ export function compile(wrapperName: string, source: string) {
         ]);
 
         return ts.factory.createCallExpression(
-          ts.factory.createIdentifier(`${this.wrapperName}.${name}`),
+          ts.factory.createIdentifier(`${context.wrapperName}.${name}`),
           undefined,
           [...params, posArray]
         );
@@ -44,7 +38,7 @@ export function compile(wrapperName: string, source: string) {
         }
       }
 
-      return ts.visitEachChild(node, visit, context);
+      return ts.visitEachChild(node, visit, ctx);
     };
 
     return (node) => ts.visitNode(node, visit);
