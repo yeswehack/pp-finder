@@ -20,13 +20,13 @@ export const elementAccessTransformer: PPTransformer = (node, utils) => {
   const key = ts.factory.createStringLiteral(Math.random().toString(36).slice(2));
 
   const newNode = utils.createWrapperCall(
-    "elem_a",
+    "elem_prop",
     node.expression,
     utils.visit(node.expression),
     key
   );
   const newArg = utils.createWrapperCall(
-    "elem_b",
+    "elem_key",
     node.argumentExpression,
     utils.visit(node.argumentExpression),
     key

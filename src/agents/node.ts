@@ -7,9 +7,11 @@
 import { PPFConfig, PPFLogger } from "../types";
 
 const agent = (config: PPFConfig, compilerImportPath?: string) => {
-  const { compile } = require(compilerImportPath ?? 'pp-finder/dist/compiler.js');
+  const { compile } = require(compilerImportPath ??
+    "pp-finder/dist/compiler.js");
   const pollutables = config.pollutables.map((p) => eval(p));
   const elemMap = new Map<any, any>();
+  let started = !config.lazyStart;
 
   function getPath(): string {
     const stack = new Error().stack as string;
@@ -47,6 +49,9 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
   const logged = new Set<string>();
 
   const maybeLog: PPFLogger = (opts) => {
+    if (!started) {
+      return;
+    }
     const canonical = `${opts.op} ${opts.key} ${opts.path} ${opts.pos}`;
     if (config.logOnce && logged.has(canonical)) {
       return;
@@ -60,7 +65,7 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
     } else {
       console.log(`[PP][${op}] at ${path}:${loc}`);
     }
-  }
+  };
 
   return {
     prop(target: any, key: PropertyKey, pos: [number, number]) {
@@ -96,12 +101,18 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
 
       return target?.(...args);
     },
-    elem_a(target: any, key: string, pos: [number, number]) {
+    start() {
+      started = true;
+    },
+    stop() {
+      started = false;
+    },
+    elem_prop(target: any, key: string, pos: [number, number]) {
       elemMap.set(key, target);
       return target;
     },
 
-    elem_b(key: any, elemKey: string, pos: [number, number]) {
+    elem_key(key: any, elemKey: string, pos: [number, number]) {
       const target = elemMap.get(elemKey);
       elemMap.delete(elemKey);
       if (canBePolluted(target, key)) {

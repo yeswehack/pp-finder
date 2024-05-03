@@ -1,8 +1,11 @@
 class Test {
   #test;
 
-  test(){
-    return this.#test;
+  test() {
+    if (#test in this) {
+      return this.#test;
+    }
+    return false;
   }
 }
 

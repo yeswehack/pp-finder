@@ -1,10 +1,10 @@
-import setup from "./setup";
 import loader from "./loader";
 import node from "./node";
+import utils from "./utils";
 
 export default {
-  setup,
   loader,
   node,
   browser: loader,
-}
+  utils,
+};

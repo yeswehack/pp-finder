@@ -1,7 +1,6 @@
 import agents from "./agents";
 import { compile } from "./compiler";
 import { loadConfig } from "./config";
-
 type Format = "builtin" | "commonjs" | "dynamic" | "json" | "module" | "wasm";
 
 interface LoadContext {
@@ -35,10 +34,11 @@ export const load: LoadHook = async function (url, context, nextLoad) {
 };
 
 export const globalPreload: GlobalPreloadHook = function () {
-  config.root = __dirname;
   const context = JSON.stringify(config);
   const agent = agents[config.agent];
-  return (
-    `globalThis.${config.wrapperName} = (${agent})(${context});`
-  );
+  return `globalThis.${config.wrapperName} = (
+  ${agent})(${context}, 
+  (${agents.utils})() ,
+  ${JSON.stringify(__dirname)}
+);`;
 };

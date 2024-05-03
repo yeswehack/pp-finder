@@ -1,20 +1,33 @@
 import { z } from "zod";
-import { PPFConfig, AGENT_NAMES } from "./types";
 import { existsSync, readFileSync } from "fs";
 
-type PPFPartialConfig = Partial<Omit<PPFConfig, "log" | "root">> & {
-  log?: Partial<PPFConfig["log"]>;
+type DeepPartial<T> = {
+  [L in keyof T]?: T[L] extends any[]
+    ? T[L]
+    : T[L] extends object
+    ? DeepPartial<T[L]>
+    : T[L];
 };
+
+type PPFPartialConfig = DeepPartial<PPFConfig>;
+
+const colorModeParser = z.enum(["auto", "always", "never"]);
+const agentParser = z.enum(["loader", "node", "browser"]);
 
 export const jsonParser = z
   .object({
-    logOnce: z.boolean().default(false).describe("Whether to log each gadget once or not"),
+    logOnce: z
+      .boolean()
+      .default(false)
+      .describe("Whether to log each gadget once or not"),
     wrapperName: z.string().default("ø").describe("Wrapper name"),
-    color: z
-      .enum(["auto", "always", "never"])
+    color: colorModeParser
       .default("auto")
       .describe("Whether to colorize the output or not"),
-    lazyStart: z.boolean().default(false).describe('Whether to wait for "pp-finder start" or not'),
+    lazyStart: z
+      .boolean()
+      .default(false)
+      .describe('Whether to wait for "pp-finder start" or not'),
     log: z
       .object({
         ForIn: z.boolean().default(true).describe("Log `for (y in x)` gadgets"),
@@ -26,12 +39,16 @@ export const jsonParser = z
       .default({})
       .describe("Define witch gadgets to log"),
     logFile: z.string().default("").describe("File to log gadgets to"),
-    pollutables: z.array(z.string()).default(["Object"]).describe("Pollutable objects"),
-    agent: z.enum(AGENT_NAMES).default("loader").describe("Agent to use"),
-    root: z.string().default(""),
+    pollutables: z
+      .array(z.string())
+      .default(["Object"])
+      .describe("Pollutable objects"),
+    agent: agentParser.default("loader").describe("Agent to use"),
   })
   .default({})
   .describe("PP Finder configuration file");
+
+export type PPFConfig = z.infer<typeof jsonParser>;
 
 const coerceBoolean = z
   .enum(["0", "1", "true", "false"])
@@ -42,7 +59,7 @@ const envParser = z
   .object({
     PPF_WRAPPER_NAME: z.string(),
     PPF_LOGONCE: coerceBoolean,
-    PPF_COLOR: z.enum(["auto", "always", "never"]),
+    PPF_COLOR: colorModeParser,
     PPF_LAZYSTART: coerceBoolean,
     PPF_LOG_FORIN: coerceBoolean,
     PPF_LOG_ISIN: coerceBoolean,
@@ -51,7 +68,7 @@ const envParser = z
     PPF_LOG_BIND: coerceBoolean,
     PPF_LOGFILE: z.string(),
     PPF_POLLUTABLES: z.string(),
-    PPF_AGENT: z.enum(AGENT_NAMES),
+    PPF_AGENT: agentParser,
   })
   .partial()
   .transform(
@@ -105,12 +122,10 @@ function mergeConfigs(...configs: PPFPartialConfig[]): PPFConfig {
       logOnce: config.logOnce ?? acc.logOnce,
       pollutables: config.pollutables ?? acc.pollutables,
       wrapperName: config.wrapperName ?? acc.wrapperName,
-
-      root: "",
     };
   }, defaultConfig);
 }
- 
+
 export const defaultConfig: PPFConfig = jsonParser.parse({});
 export function loadConfig() {
   const filename = process.env.PPF_CONFIG_FILE || "pp-finder.json";

@@ -4,7 +4,7 @@ import { Type, command, option, optional, positional, string, rest } from "cmd-t
 export default command({
   name: "run",
   description: `Run a command with pp-finder:
-  ex: pp-finder run -c ./ppfinder.json "node test.js"`,
+  ex: pp-finder run -c ./ppfinder.json  -- node test.js`,
   args: {
     cmd: positional({
       type: string,

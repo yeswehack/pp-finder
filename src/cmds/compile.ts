@@ -21,10 +21,10 @@ export default command({
     }),
     compilerPath: option({
       type: optional(string),
-      long: 'compiler-path',
-      short: 'c',
-      description: "Force compiler import path"
-    })
+      long: "compiler-path",
+      short: "c",
+      description: "Force compiler import path",
+    }),
   },
   async handler({ file: filePath, output: outputFilePath, compilerPath }) {
     const config = loadConfig();
@@ -39,9 +39,13 @@ export default command({
 
     const jsonConfig = JSON.stringify(config);
 
-    const agent = agents['node']; // TODO: conditional browser
+    const agent = agents["node"]; // TODO: conditional browser
     let compiledSource = "";
-    compiledSource += `globalThis.${config.wrapperName} = (${agent})(${jsonConfig}, ${JSON.stringify(compilerPath)});`;
+    compiledSource += `globalThis.${
+      config.wrapperName
+    } = (${agent})(${jsonConfig},(${agents.utils})() ,${JSON.stringify(
+      compilerPath
+    )});`;
     compiledSource += "\n".repeat(3);
     compiledSource += compile(config, fileData);
 

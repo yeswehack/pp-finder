@@ -1,6 +1,7 @@
 import arrowFunctionTransformer from "./arrowFunction";
 import callExpressionTransformer from "./callExpression";
 import elementAccessTransformer from "./elementAccess";
+import expressionStatementTransformer from "./expressionStatement";
 import forInStatementTransformer from "./forInStatement";
 import functionDeclarationTransformer from "./functionDeclaration";
 import functionExpressionTransformer from "./functionExpression";
@@ -11,6 +12,7 @@ import variableDeclarationTransformer from "./variableDeclaration";
 
 export const transformers = [
   elementAccessTransformer,
+  expressionStatementTransformer,
   callExpressionTransformer,
   propertyAccessTransformer,
   variableDeclarationTransformer,
