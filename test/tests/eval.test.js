@@ -6,3 +6,6 @@ Function("return ({})")().d;
 x.constructor.constructor("return ({})")().e;
 
 eval("Function('({}).f')()")
+
+
+
