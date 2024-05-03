@@ -19,6 +19,7 @@
     "cli": "ts-node ./src/cli.ts"
   },
   "dependencies": {
+    "@inquirer/select": "^2.3.2",
     "@oclif/core": "^2.9.4",
     "cmd-ts": "^0.13.0",
     "ncc": "^0.3.6",
