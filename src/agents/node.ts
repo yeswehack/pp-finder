@@ -4,10 +4,10 @@
  * and must not have any dependencies
  */
 
-import {  PPFConfig, PPFLogger } from "../types";
+import { PPFConfig, PPFLogger } from "../types";
 
-const agent = (config: PPFConfig) => {
-  const { compile } = require("pp-finder/dist/compiler.js");
+const agent = (config: PPFConfig, compilerImportPath?: string) => {
+  const { compile } = require(compilerImportPath ?? 'pp-finder/dist/compiler.js');
   const pollutables = config.pollutables.map((p) => eval(p));
   const elemMap = new Map<any, any>();
 
@@ -45,25 +45,22 @@ const agent = (config: PPFConfig) => {
   }
 
   const logged = new Set<string>();
+
   const maybeLog: PPFLogger = (opts) => {
     const canonical = `${opts.op} ${opts.key} ${opts.path} ${opts.pos}`;
     if (config.logOnce && logged.has(canonical)) {
       return;
     }
     logged.add(canonical);
-    logger(opts);
-  };
-  const logger: PPFLogger = ({ op, key, path, pos }) => {
-    const shortPath = require("path").relative(__dirname, path);
-    console.log(shortPath);
-    console.log(__dirname);
-    console.log(path);
+    const { op, key, path, pos } = opts;
+    const shortPath = path.replace(process.cwd(), ".");
+    const loc = `${pos[0]}:${pos[1]}`;
     if (key) {
-      console.log(`[PP][${op}] ${key} at ${shortPath}`);
+      console.log(`[PP][${op}] ${key} at ${shortPath}:${loc}`);
     } else {
-      console.log(`[PP][${op}] at ${shortPath}`);
+      console.log(`[PP][${op}] at ${path}:${loc}`);
     }
-  };
+  }
 
   return {
     prop(target: any, key: PropertyKey, pos: [number, number]) {

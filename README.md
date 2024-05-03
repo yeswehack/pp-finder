@@ -8,6 +8,8 @@ For instance, the following candidate will be highlighted by pp-finder:
 if (options.exec) child_process.exec(options.exec);
 ```
 
+> Tested with v20.2.0
+
 ## Installation
 
 ### NPM

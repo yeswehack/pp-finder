@@ -19,8 +19,14 @@ export default command({
       short: "o",
       description: "Output folder path",
     }),
+    compilerPath: option({
+      type: optional(string),
+      long: 'compiler-path',
+      short: 'c',
+      description: "Force compiler import path"
+    })
   },
-  async handler({ file: filePath, output: outputFilePath }) {
+  async handler({ file: filePath, output: outputFilePath, compilerPath }) {
     const config = loadConfig();
     const input = filePath === "-" ? process.stdin : createReadStream(filePath);
 
@@ -33,9 +39,9 @@ export default command({
 
     const jsonConfig = JSON.stringify(config);
 
-    const agent = agents[config.agent];
+    const agent = agents['node']; // TODO: conditional browser
     let compiledSource = "";
-    compiledSource += `globalThis.${config.wrapperName} = (${agents.setup})(${jsonConfig}, ${agent});`;
+    compiledSource += `globalThis.${config.wrapperName} = (${agent})(${jsonConfig}, ${JSON.stringify(compilerPath)});`;
     compiledSource += "\n".repeat(3);
     compiledSource += compile(config, fileData);
 
