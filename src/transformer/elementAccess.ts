@@ -1,9 +1,8 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
-import { isInAssignation } from "./utils";
+import { defineTransformer, isInAssignation } from "./utils";
 
 // x[y]
-export const elementAccessTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (
     isInAssignation(node) ||
@@ -13,26 +12,29 @@ export const elementAccessTransformer: PPTransformer = (node, utils) => {
     return null;
   }
 
-  if (ts.isPostfixUnaryExpression(node.parent) || ts.isPrefixUnaryExpression(node.parent)) {
+  if (
+    ts.isPostfixUnaryExpression(node.parent) ||
+    ts.isPrefixUnaryExpression(node.parent)
+  ) {
     return node;
   }
 
-  const key = ts.factory.createStringLiteral(Math.random().toString(36).slice(2));
-
-  const newNode = utils.createWrapperCall(
-    "elem_prop",
-    node.expression,
-    utils.visit(node.expression),
-    key
+  const key = ts.factory.createStringLiteral(
+    Math.random().toString(36).slice(2)
   );
-  const newArg = utils.createWrapperCall(
-    "elem_key",
+
+  const newNode = utils.createPPFCall(
+    "elemProp",
+    node.expression,
+    key,
+    utils.visit(node.expression)
+  );
+  const newArg = utils.createPPFCall(
+    "elemKey",
     node.argumentExpression,
-    utils.visit(node.argumentExpression),
-    key
+    key,
+    utils.visit(node.argumentExpression)
   );
 
   return ts.factory.updateElementAccessExpression(node, newNode, newArg);
-};
-
-export default elementAccessTransformer;
+});

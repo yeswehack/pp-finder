@@ -4,73 +4,37 @@
  * and must not have any dependencies
  */
 
-import { PPFConfig, PPFLogger } from "../types";
+import { defineAgent } from "./utils";
 
-const agent = (config: PPFConfig, compilerImportPath?: string) => {
+export default defineAgent((config, utils, compilerImportPath?: string) => {
   const { compile } = require(compilerImportPath ??
     "pp-finder/dist/compiler.js");
   const pollutables = config.pollutables.map((p) => eval(p));
   const elemMap = new Map<any, any>();
-  let started = !config.lazyStart;
 
-  function getPath(): string {
-    const stack = new Error().stack as string;
-    const line = stack.split("\n")[3];
-    let match;
-    if ((match = line?.match(/\((.*):\d+:\d+\)/))) {
-      return match[1]!;
-    }
-    if ((match = line?.match(/at (.*):\d+:\d+/))) {
-      return match[1]!;
-    }
-    return "unknown";
-  }
+  const getPath = utils.createGetPath(/([^ (]+?):\d+:\d+/, 3);
+  const canBePolluted = utils.createCanBePolluted(pollutables);
 
-  function canBePolluted(target: any, key?: PropertyKey) {
-    if (
-      !target ||
-      key === "__proto__" ||
-      (typeof key === "string" && key.startsWith("#"))
-    ) {
-      return false;
-    }
-
-    for (let obj = target; obj; obj = Object.getPrototypeOf(obj)) {
-      if (pollutables.some((p) => p.prototype === obj)) {
-        return true;
-      }
-      if (key !== undefined && Object.hasOwnProperty.call(obj, key)) {
-        return false;
-      }
-    }
-    return false;
-  }
-
-  const logged = new Set<string>();
-
-  const maybeLog: PPFLogger = (opts) => {
-    if (!started) {
-      return;
-    }
-    const canonical = `${opts.op} ${opts.key} ${opts.path} ${opts.pos}`;
-    if (config.logOnce && logged.has(canonical)) {
-      return;
-    }
-    logged.add(canonical);
-    const { op, key, path, pos } = opts;
+  const log = utils.createLog<{
+    op: string;
+    key?: string;
+    path: string;
+    pos: [number, number];
+  }>(config, ({ op, key, path, pos }) => {
     const shortPath = path.replace(process.cwd(), ".");
     const loc = `${pos[0]}:${pos[1]}`;
+
     if (key) {
       console.log(`[PP][${op}] ${key} at ${shortPath}:${loc}`);
     } else {
       console.log(`[PP][${op}] at ${path}:${loc}`);
     }
-  };
+  });
 
   return {
-    prop(target: any, key: PropertyKey, pos: [number, number]) {
+    prop(pos, target, key) {
       if (canBePolluted(target, key)) {
-        maybeLog({
+        log.maybeLog({
           op: "prop",
           path: getPath(),
           pos,
@@ -79,19 +43,18 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
       }
       return target;
     },
-    call(target: any, ...args: any[]) {
-      const pos = args.pop();
-      let log = false;
+    call(pos, target: any, ...args: any[]) {
+      let needLog = false;
       if (target?.name === "Function" || target?.name === "bound Function") {
         args[args.length - 1] = compile(config, args[args.length - 1]);
-        log = true;
+        needLog = true;
       } else if (target?.name === "eval" || target?.name === "bound eval") {
         args[0] = compile(config, args[0]);
-        log = true;
+        needLog = true;
       }
 
-      if (log) {
-        maybeLog({
+      if (needLog) {
+        log.maybeLog({
           op: "call",
           path: getPath(),
           key: target?.name.replace(/^bound /, ""),
@@ -102,21 +65,21 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
       return target?.(...args);
     },
     start() {
-      started = true;
+      log.start();
     },
     stop() {
-      started = false;
+      log.stop();
     },
-    elem_prop(target: any, key: string, pos: [number, number]) {
-      elemMap.set(key, target);
+    elemProp(pos, id, target) {
+      elemMap.set(id, target);
       return target;
     },
 
-    elem_key(key: any, elemKey: string, pos: [number, number]) {
-      const target = elemMap.get(elemKey);
-      elemMap.delete(elemKey);
+    elemKey(pos, id, key) {
+      const target = elemMap.get(id);
+      elemMap.delete(id);
       if (canBePolluted(target, key)) {
-        maybeLog({
+        log.maybeLog({
           op: "elem",
           path: getPath(),
           pos,
@@ -125,9 +88,9 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
       }
       return key;
     },
-    forIn(target: any, pos: [number, number]) {
+    forIn(pos, target) {
       if (canBePolluted(target)) {
-        maybeLog({
+        log.maybeLog({
           op: "forIn",
           path: getPath(),
           pos,
@@ -135,9 +98,9 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
       }
       return target;
     },
-    isIn(target: any, key: PropertyKey, pos: [number, number]) {
+    isIn(pos, target, key) {
       if (canBePolluted(target, key)) {
-        maybeLog({
+        log.maybeLog({
           op: "isIn",
           path: getPath(),
           pos,
@@ -146,14 +109,14 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
       }
       return key in target;
     },
-    bind(target: any, keyList: PropertyKey[][], pos: [number, number]) {
+    bind(pos, target, keyList) {
       for (const keys of keyList) {
         let t = target;
         const path = [];
         for (const key of keys) {
           if (canBePolluted(t, key)) {
             path.push(key);
-            maybeLog({
+            log.maybeLog({
               op: "bind",
               path: getPath(),
               pos,
@@ -168,6 +131,4 @@ const agent = (config: PPFConfig, compilerImportPath?: string) => {
       return target;
     },
   };
-};
-
-export default agent;
+});

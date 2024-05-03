@@ -1,12 +1,24 @@
+import { PPFConfig } from "../config";
+import { PPFOps } from "../types";
+
+type PPFAgentUtils = ReturnType<typeof createUtils>;
+
+type PPFAgent<TArgs extends any[]> = (
+  config: PPFConfig,
+  utils: PPFAgentUtils,
+  ...args: TArgs
+) => PPFOps;
+export function defineAgent<TArgs extends any[] = unknown[]>(
+  f: PPFAgent<TArgs>
+) {
+  return f;
+}
+
 /**
  * WARNING !
- * This file is used as a string by the loader, all the code must be inside the default export function
+ * This function is used as a string by the loader, all the code must be inside
  * and must not have any dependencies
  */
-
-import { PPFConfig } from "../config";
-
-export type PPFAgentUtils = ReturnType<typeof createUtils>;
 const createUtils = () => {
   return {
     createGetPath(regex: RegExp, depth: number) {

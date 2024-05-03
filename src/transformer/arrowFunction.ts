@@ -1,9 +1,9 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
-import { replaceParams } from "./utils";
+import { defineTransformer, replaceParams } from "./utils";
+
 
 //  (({y}) => ())(x)
-export const arrowFunctionTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (
     !ts.isArrowFunction(node) ||
@@ -33,6 +33,4 @@ export const arrowFunctionTransformer: PPTransformer = (node, utils) => {
     node.equalsGreaterThanToken,
     ts.factory.createBlock([...newStatements, ...oldStatements])
   );
-};
-
-export default arrowFunctionTransformer;
+});

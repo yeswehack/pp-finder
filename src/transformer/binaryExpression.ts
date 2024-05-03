@@ -1,7 +1,7 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
+import { defineTransformer } from "./utils";
 
-export const binaryExpressionTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   if (!ts.isBinaryExpression(node)) {
     return null;
   }
@@ -12,4 +12,4 @@ export const binaryExpressionTransformer: PPTransformer = (node, utils) => {
     node.operatorToken,
     utils.visit(node.right)
   );
-};
+});

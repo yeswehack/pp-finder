@@ -1,5 +1,6 @@
 import ts from "typescript";
-import { PPTransformerUtils } from "../types";
+import { PPFConfig } from "../config";
+import { PPFOps } from "../types";
 
 function isAssignation(operator: ts.BinaryOperator): boolean {
   const assignationTokens = [
@@ -67,14 +68,17 @@ export function* iterBindingPatternPath(
     }
 
     if (ts.isComputedPropertyName(elem.propertyName)) {
-      yield ts.factory.createArrayLiteralExpression([...path, elem.propertyName.expression]);
+      yield ts.factory.createArrayLiteralExpression([
+        ...path,
+        elem.propertyName.expression,
+      ]);
     }
   }
 }
 
 export function replaceParams(
   node: ts.FunctionDeclaration | ts.ArrowFunction | ts.FunctionExpression,
-  { config, createWrapperCall }: PPTransformerUtils
+  { config, createPPFCall }: PPTransformerUtils
 ) {
   const newParameters: ts.ParameterDeclaration[] = [];
   const newDeclarations: ts.VariableDeclaration[] = [];
@@ -87,7 +91,7 @@ export function replaceParams(
 
       const identifier = ts.factory.createIdentifier(name);
 
-      const newNode = createWrapperCall(
+      const newNode = createPPFCall(
         "bind",
         param,
         identifier,
@@ -95,7 +99,12 @@ export function replaceParams(
       );
 
       newDeclarations.push(
-        ts.factory.createVariableDeclaration(param.name, undefined, undefined, newNode)
+        ts.factory.createVariableDeclaration(
+          param.name,
+          undefined,
+          undefined,
+          newNode
+        )
       );
 
       newParameters.push(
@@ -119,10 +128,32 @@ export function replaceParams(
     newStatements.push(
       ts.factory.createVariableStatement(
         undefined,
-        ts.factory.createVariableDeclarationList(newDeclarations, ts.NodeFlags.Let)
+        ts.factory.createVariableDeclarationList(
+          newDeclarations,
+          ts.NodeFlags.Let
+        )
       )
     );
   }
 
   return { newParameters, newStatements };
+}
+
+export type PPTransformerUtils = {
+  config: PPFConfig;
+  visit: <U extends ts.Node>(n: U) => U;
+  createPPFCall: (
+    name: keyof PPFOps,
+    target: ts.Node,
+    ...args: ts.Expression[]
+  ) => ts.CallExpression;
+};
+
+export type PPTransformer = (
+  node: ts.Node,
+  utils: PPTransformerUtils
+) => ts.Node | null;
+
+export function defineTransformer(f: PPTransformer) {
+  return f;
 }

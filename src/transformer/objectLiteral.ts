@@ -1,8 +1,8 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
+import { defineTransformer } from "./utils";
 
 // ({y} = x);
-export const objectLiteralTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (
     !ts.isBinaryExpression(node) ||
@@ -41,15 +41,21 @@ export const objectLiteralTransformer: PPTransformer = (node, utils) => {
         }
       }
 
-      if (ts.isPropertyAssignment(prop) && ts.isComputedPropertyName(prop.name)) {
-        yield ts.factory.createArrayLiteralExpression([...path, prop.name.expression]);
+      if (
+        ts.isPropertyAssignment(prop) &&
+        ts.isComputedPropertyName(prop.name)
+      ) {
+        yield ts.factory.createArrayLiteralExpression([
+          ...path,
+          prop.name.expression,
+        ]);
       }
     }
   }
 
   const paths = Array.from(iterPaths(node.left));
 
-  const newNode = utils.createWrapperCall(
+  const newNode = utils.createPPFCall(
     "bind",
     node.right,
     utils.visit(node.right),
@@ -62,6 +68,4 @@ export const objectLiteralTransformer: PPTransformer = (node, utils) => {
     node.operatorToken,
     newNode
   );
-};
-
-export default objectLiteralTransformer;
+});

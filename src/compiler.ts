@@ -1,12 +1,19 @@
 import ts from "typescript";
 import { transformers } from "./transformer";
-import { PPFConfig, PPTransformerUtils } from "./types";
+import { PPTransformerUtils } from "./transformer/utils";
+import { PPFConfig } from "./config";
 
 export function compile(context: PPFConfig, source: string) {
   if (source.startsWith("#!")) {
     source = "//" + source;
   }
-  const tree = ts.createSourceFile("", source, ts.ScriptTarget.ESNext, true, ts.ScriptKind.JS);
+  const tree = ts.createSourceFile(
+    "",
+    source,
+    ts.ScriptTarget.ESNext,
+    true,
+    ts.ScriptKind.JS
+  );
 
   const printer = ts.createPrinter();
   const transformer: ts.TransformerFactory<ts.SourceFile> = (ctx) => {
@@ -15,7 +22,7 @@ export function compile(context: PPFConfig, source: string) {
       visit<T extends ts.Node>(node: T) {
         return ts.visitNode<T>(node, visit);
       },
-      createWrapperCall(name, target, ...params) {
+      createPPFCall(name, target, ...params) {
         const pos = ts.getLineAndCharacterOfPosition(tree, target.getStart());
         const posArray = ts.factory.createArrayLiteralExpression([
           ts.factory.createNumericLiteral(pos.line + 1),
@@ -25,7 +32,7 @@ export function compile(context: PPFConfig, source: string) {
         return ts.factory.createCallExpression(
           ts.factory.createIdentifier(`${context.wrapperName}.${name}`),
           undefined,
-          [...params, posArray]
+          [posArray, ...params]
         );
       },
     };

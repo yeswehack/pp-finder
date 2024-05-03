@@ -1,9 +1,8 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
-import { replaceParams } from "./utils";
+import { defineTransformer, replaceParams } from "./utils";
 
 // function f({y}) {}
-export const functionExpressionTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (
     !ts.isFunctionExpression(node) ||
@@ -29,6 +28,4 @@ export const functionExpressionTransformer: PPTransformer = (node, utils) => {
       ...utils.visit(node.body).statements,
     ])
   );
-};
-
-export default functionExpressionTransformer;
+});

@@ -4,11 +4,10 @@
  * and must not have any dependencies
  */
 
-import { PPFConfig, PPFLogger } from "../types";
-import { PPFAgentUtils } from "./utils";
+import { defineAgent } from "./utils";
 declare function getBuiltin<T>(module: string): T;
 
-const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
+export default defineAgent((config, utils, root: string) => {
   const process = getBuiltin<typeof import("process")>("process");
   const Module = getBuiltin<typeof import("module")>("module");
   const pollutables = config.pollutables.map((p) => eval(p));
@@ -48,7 +47,6 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
   }
   processHookRequire();
 
-
   const log = utils.createLog<{
     op: string;
     key?: string;
@@ -65,10 +63,8 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
     }
   });
 
-
-  
   return {
-    prop(target: any, key: PropertyKey, pos: [number, number]) {
+    prop(pos, target, key) {
       if (canBePolluted(target, key)) {
         log.maybeLog({
           op: "prop",
@@ -79,8 +75,7 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
       }
       return target;
     },
-    call(target: any, ...args: any[]) {
-      const pos = args.pop();
+    call(pos, target, ...args) {
       let needLog = false;
       if (target?.name === "Function" || target?.name === "bound Function") {
         args[args.length - 1] = compile(config, args[args.length - 1]);
@@ -101,14 +96,14 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
 
       return target?.(...args);
     },
-    elem_prop(target: any, key: string, pos: [number, number]) {
-      elemMap.set(key, target);
+    elemProp(pos, id, target) {
+      elemMap.set(id, target);
       return target;
     },
 
-    elem_key(key: any, elemKey: string, pos: [number, number]) {
-      const target = elemMap.get(elemKey);
-      elemMap.delete(elemKey);
+    elemKey(pos, id, key) {
+      const target = elemMap.get(id);
+      elemMap.delete(id);
       if (canBePolluted(target, key)) {
         log.maybeLog({
           op: "elem",
@@ -125,7 +120,7 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
     stop() {
       log.stop();
     },
-    forIn(target: any, pos: [number, number]) {
+    forIn(pos, target) {
       if (canBePolluted(target)) {
         log.maybeLog({
           op: "forIn",
@@ -135,7 +130,7 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
       }
       return target;
     },
-    isIn(target: any, key: PropertyKey, pos: [number, number]) {
+    isIn(pos, target, key) {
       if (canBePolluted(target, key)) {
         log.maybeLog({
           op: "isIn",
@@ -146,7 +141,7 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
       }
       return key in target;
     },
-    bind(target: any, keyList: PropertyKey[][], pos: [number, number]) {
+    bind(pos, target, keyList) {
       for (const keys of keyList) {
         let t = target;
         const path = [];
@@ -172,6 +167,4 @@ const agent = (config: PPFConfig, utils: PPFAgentUtils, root: string) => {
   /*
 
   */
-};
-
-export default agent;
+});

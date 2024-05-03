@@ -1,9 +1,8 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
-import { iterBindingPatternPath } from "./utils";
+import { defineTransformer, iterBindingPatternPath } from "./utils";
 
 // const {y} = x;
-export const variableDeclarationTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (
     !ts.isVariableDeclaration(node) ||
@@ -15,7 +14,7 @@ export const variableDeclarationTransformer: PPTransformer = (node, utils) => {
 
   // Transform
   const paths = Array.from(iterBindingPatternPath(node.name));
-  const newNode = utils.createWrapperCall(
+  const newNode = utils.createPPFCall(
     "bind",
     node.initializer,
     utils.visit(node.initializer),
@@ -29,5 +28,4 @@ export const variableDeclarationTransformer: PPTransformer = (node, utils) => {
     node.type,
     newNode
   );
-};
-export default variableDeclarationTransformer;
+});

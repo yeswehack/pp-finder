@@ -1,15 +1,19 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
+import { defineTransformer } from "./utils";
 
 // for (let y in x)
-export const forInStatementTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (!ts.isForInStatement(node)) {
     return null;
   }
 
   // Transform
-  const newNode = utils.createWrapperCall("forIn", node.expression, utils.visit(node.expression));
+  const newNode = utils.createPPFCall(
+    "forIn",
+    node.expression,
+    utils.visit(node.expression)
+  );
 
   return ts.factory.updateForInStatement(
     node,
@@ -17,6 +21,4 @@ export const forInStatementTransformer: PPTransformer = (node, utils) => {
     newNode,
     utils.visit(node.statement)
   );
-};
-
-export default forInStatementTransformer;
+});

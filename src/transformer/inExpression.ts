@@ -1,8 +1,8 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
+import { defineTransformer } from "./utils";
 
 // if (y in x)
-export const InExpressionTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (
     !ts.isBinaryExpression(node) ||
@@ -16,12 +16,10 @@ export const InExpressionTransformer: PPTransformer = (node, utils) => {
   }
 
   // Transform
-  return utils.createWrapperCall(
+  return utils.createPPFCall(
     "isIn",
     node.right,
     utils.visit(node.right),
     utils.visit(node.left)
   );
-};
-
-export default InExpressionTransformer;
+});

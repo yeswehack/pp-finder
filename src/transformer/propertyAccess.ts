@@ -1,9 +1,8 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
-import { isInAssignation } from "./utils";
+import { defineTransformer, isInAssignation } from "./utils";
 
 // x.y
-export const propertyAccessTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (
     isInAssignation(node) ||
@@ -14,14 +13,16 @@ export const propertyAccessTransformer: PPTransformer = (node, utils) => {
   }
 
   // Transform
-  const newNode = utils.createWrapperCall(
+  const newNode = utils.createPPFCall(
     "prop",
     node.name,
     utils.visit(node.expression),
     ts.factory.createStringLiteral(node.name.text)
   );
 
-  return ts.factory.updatePropertyAccessExpression(node, newNode, utils.visit(node.name));
-};
-
-export default propertyAccessTransformer;
+  return ts.factory.updatePropertyAccessExpression(
+    node,
+    newNode,
+    utils.visit(node.name)
+  );
+});

@@ -1,9 +1,8 @@
 import ts from "typescript";
-import { PPTransformer } from "../types";
-import { isInAssignation } from "./utils";
+import { defineTransformer } from "./utils";
 
 // x(y)
-export const callExpressionTransformer: PPTransformer = (node, utils) => {
+export default defineTransformer((node, utils) => {
   // Check
   if (!ts.isCallExpression(node)) {
     return null;
@@ -33,9 +32,12 @@ export const callExpressionTransformer: PPTransformer = (node, utils) => {
   }
 
   const args = node.arguments.map(utils.visit);
-  const newNode = utils.createWrapperCall("call", node.expression, func, ...args);
+  const newNode = utils.createPPFCall(
+    "call",
+    node.expression,
+    func,
+    ...args
+  );
 
   return newNode;
-};
-
-export default callExpressionTransformer;
+});
