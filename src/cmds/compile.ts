@@ -1,11 +1,9 @@
-import { Type, command, option, optional, positional, string } from "cmd-ts";
+import { command, option, optional, positional, string } from "cmd-ts";
 import { createReadStream } from "fs";
 import fs from "fs/promises";
-import path from "path";
 import agents from "../agents";
 import { compile } from "../compiler";
 import { loadConfig } from "../config";
-import { PPFAgentName } from "../types";
 
 export default command({
   name: "compile",
@@ -34,8 +32,6 @@ export default command({
     }
 
     const jsonConfig = JSON.stringify(config);
-
-    const root = JSON.stringify(path.join(__dirname, ".."));
 
     const agent = agents[config.agent];
     let compiledSource = "";

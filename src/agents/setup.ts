@@ -5,7 +5,7 @@ export default (config: PPFConfig, agent: PPFAgent) => {
   const process = getBuiltin<typeof import("process")>("process");
   const Module = getBuiltin<typeof import("module")>("module");
   const require = Module.createRequire(process.cwd());
-  const { compile } = require(`${config.root}/compiler.js`) as typeof import("../compiler");
+  const { compile } = require(`${config.root}/compiler.cjs`) as typeof import("../compiler");
   const logger = agent(config);
   const logged = new Set<string>();
 

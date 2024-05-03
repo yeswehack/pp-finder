@@ -8,10 +8,9 @@ clean:
 	@echo "Cleaning up"
 	@rm -rf ./dist
 
-
-
 SOURCES := $(shell find ./src -name '*.ts')
 TESTS := $(shell find ./test -type f)
+SHELL := /bin/bash
 
 watch:
 	@while true; do \
@@ -31,7 +30,7 @@ dist/loader.cjs: ${SOURCES}
 	mv "$${TMP_DIR}/index.js" "./dist/loader.cjs" && \
 	rmdir "$${TMP_DIR}"
 
-dist/cli.cjs:  ${SOURCES}
+dist/cli.cjs: ${SOURCES}
 	@echo "Building CLI"
 	@mkdir -p dist
 	@TMP_DIR="$$(mktemp -d)" && \
@@ -39,7 +38,7 @@ dist/cli.cjs:  ${SOURCES}
 	mv "$${TMP_DIR}/index.js" "./dist/cli.cjs" && \
 	rmdir "$${TMP_DIR}"
 
-dist/compiler.js:  ${SOURCES}
+dist/compiler.js: ${SOURCES}
 	@echo "Building compiler"
 	@mkdir -p dist
 	@TMP_DIR="$$(mktemp -d)" && \
@@ -47,7 +46,6 @@ dist/compiler.js:  ${SOURCES}
 	mv "$${TMP_DIR}/index.js" "./dist/compiler.js" && \
 	rmdir "$${TMP_DIR}"
 
-dist/pp-finder.schema.json: SHELL:=/bin/bash 
 dist/pp-finder.schema.json: ./src/config.ts
 	@echo "Generating JSON schema"
 	@mkdir -p dist

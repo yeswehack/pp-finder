@@ -15,7 +15,8 @@
     "build": "make all -j 4",
     "dev": "make watch -j 4",
     "test": "make test -j 4",
-    "prepare": "make all -j 4"
+    "prepare": "make all -j 4",
+    "cli": "ts-node ./src/cli.ts"
   },
   "dependencies": {
     "@oclif/core": "^2.9.4",
