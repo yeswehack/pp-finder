@@ -47,6 +47,24 @@ export default defineAgent((config, utils, root: string) => {
   }
   processHookRequire();
 
+
+  const colorMap: Record<string, string> = {
+    reset: "\x1b[0m",
+    PP: "\x1b[34m",
+    bind: "\x1b[35m",
+    elem: "\x1b[32m",
+    forIn: "\x1b[31m",
+    isIn: "\x1b[33m",
+    prop: "\x1b[36m",
+  } as const;
+
+  const format = (color: keyof typeof colorMap, text: string, wraps = "") => {
+    const prefix = wraps.length == 2 ? wraps[0] : "";
+    const suffix = wraps.length == 2 ? wraps[1] : "";
+
+    return `${prefix}${colorMap[color]}${text}${colorMap.reset}${suffix}`;
+  };
+
   const log = utils.createLog<{
     op: string;
     key?: string;
@@ -55,12 +73,19 @@ export default defineAgent((config, utils, root: string) => {
   }>(config, ({ op, key, path, pos }) => {
     const shortPath = path.replace(process.cwd(), ".");
     const loc = `${pos[0]}:${pos[1]}`;
+    const shouldColorize = ["always", "auto"].includes(config.color);
 
-    if (key) {
-      console.log(`[PP][${op}] ${key} at ${shortPath}:${loc}`);
-    } else {
-      console.log(`[PP][${op}] at ${path}:${loc}`);
+    const keyStr = key || '_';
+    const pathStr = key ? shortPath : path;
+
+    if (!shouldColorize) {
+      console.log(`[PP][${op}] ${keyStr} at ${pathStr}:${loc}`);
+      return
     }
+
+    const msg = [keyStr, pathStr, loc];
+
+    console.log(`${format("PP", "PP", "[]")}${format(op, op, "[]")} ${msg.join(" ")}`);
   });
 
   return {
