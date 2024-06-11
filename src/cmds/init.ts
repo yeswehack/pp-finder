@@ -1,5 +1,4 @@
-import child_process from "child_process";
-import { Type, command, option, optional, positional, string, rest } from "cmd-ts";
+import { command } from "cmd-ts";
 import fs from "fs";
 import { jsonParser } from "../config";
 

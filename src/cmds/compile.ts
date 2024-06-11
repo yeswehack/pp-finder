@@ -41,11 +41,10 @@ export default command({
 
     const agent = agents["node"]; // TODO: conditional browser
     let compiledSource = "";
-    compiledSource += `globalThis.${
-      config.wrapperName
-    } = (${agent})(${jsonConfig},(${agents.utils})() ,${JSON.stringify(
-      compilerPath
-    )});`;
+    compiledSource += `globalThis.${config.wrapperName
+      } = (${agent})(${jsonConfig},(${agents.utils})() ,${JSON.stringify(
+        compilerPath
+      )});`;
     compiledSource += "\n".repeat(3);
     compiledSource += compile(config, fileData);
 

@@ -1,5 +1,5 @@
 import child_process from "child_process";
-import { Type, command, option, optional, positional, string, rest } from "cmd-ts";
+import { command, option, optional, positional, rest, string } from "cmd-ts";
 
 export default command({
   name: "run",
