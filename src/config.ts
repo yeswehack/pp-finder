@@ -17,7 +17,7 @@ const agentParser = z.enum(["loader", "node", "browser"]);
 const defaultTransformers = [
   'elementAccess',
   'expressionStatement',
-  'callExpression',
+  // 'callExpression', // TODO: unstable, doesn't work for some target
   'propertyAccess',
   'variableDeclaration',
   'objectLiteral',
@@ -70,8 +70,8 @@ const envParser = z
     PPF_LAZYSTART: coerceBoolean,
     PPF_LOGFILE: z.string(),
     PPF_POLLUTABLES: z.string(),
+    PPF_TRANSFORMERS: z.string(),
     PPF_AGENT: agentParser,
-    PPF_TRANSFORMERS: z.string()
   })
   .partial()
   .transform(

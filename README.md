@@ -109,7 +109,7 @@ You can choose which transformers to use for the compilation. By defaults all ar
 const defaultTransformers = [
   'elementAccess',
   'expressionStatement',
-  'callExpression',
+  // 'callExpression', // TODO: unstable, doesn't work for some target
   'propertyAccess',
   'variableDeclaration',
   'objectLiteral',
