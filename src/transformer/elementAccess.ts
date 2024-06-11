@@ -2,7 +2,7 @@ import ts from "typescript";
 import { defineTransformer, isInAssignation } from "./utils";
 
 // x[y]
-export default defineTransformer((node, utils) => {
+export default defineTransformer('elementAccess', (node, utils) => {
   // Check
   if (
     isInAssignation(node) ||

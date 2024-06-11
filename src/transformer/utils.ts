@@ -149,11 +149,17 @@ export type PPTransformerUtils = {
   ) => ts.CallExpression;
 };
 
-export type PPTransformer = (
+export type PPTransformerFunc = (
   node: ts.Node,
   utils: PPTransformerUtils
 ) => ts.Node | null;
 
-export function defineTransformer(f: PPTransformer) {
-  return f;
+
+export type PPTransformer = {
+  name: string;
+  func: PPTransformerFunc
+}
+
+export function defineTransformer(name: string, f: PPTransformerFunc): PPTransformer {
+  return { name, func: f } as PPTransformer;
 }

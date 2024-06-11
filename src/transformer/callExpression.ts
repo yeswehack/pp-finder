@@ -2,7 +2,7 @@ import ts from "typescript";
 import { defineTransformer } from "./utils";
 
 // x(y)
-export default defineTransformer((node, utils) => {
+export default defineTransformer('callExpression', (node, utils) => {
   // Check
   if (!ts.isCallExpression(node)) {
     return null;

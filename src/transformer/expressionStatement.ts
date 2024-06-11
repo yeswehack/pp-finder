@@ -2,7 +2,7 @@ import ts from "typescript";
 import { defineTransformer } from "./utils";
 
 // "start pp-finder" | "stop pp-finder"
-export default defineTransformer((node, utils) => {
+export default defineTransformer('expressionStatement', (node, utils) => {
   // Check
   if (!ts.isExpressionStatement(node) || !ts.isStringLiteral(node.expression)) {
     return null;

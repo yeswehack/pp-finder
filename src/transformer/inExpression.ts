@@ -2,7 +2,7 @@ import ts from "typescript";
 import { defineTransformer } from "./utils";
 
 // if (y in x)
-export default defineTransformer((node, utils) => {
+export default defineTransformer('inExpression', (node, utils) => {
   // Check
   if (
     !ts.isBinaryExpression(node) ||

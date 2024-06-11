@@ -3,7 +3,7 @@ import { defineTransformer, replaceParams } from "./utils";
 
 
 //  (({y}) => ())(x)
-export default defineTransformer((node, utils) => {
+export default defineTransformer('arrowFunction', (node, utils) => {
   // Check
   if (
     !ts.isArrowFunction(node) ||

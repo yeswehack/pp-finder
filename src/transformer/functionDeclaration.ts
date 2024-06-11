@@ -2,7 +2,7 @@ import ts from "typescript";
 import { defineTransformer, replaceParams } from "./utils";
 
 // function f({y}) {}
-export default defineTransformer((node, utils) => {
+export default defineTransformer('functionDeclaration', (node, utils) => {
   // Check
   if (
     !ts.isFunctionDeclaration(node) ||

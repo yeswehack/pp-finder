@@ -54,8 +54,11 @@ To hunt for prototype pollution gadgets, pp-finder will parse the javascript sou
 
 It will use the `--experimental-loader` options from nodejs to perform ast modifications on the fly (Tested with node v18.18.2).
 
+> Also tested with node v20.2.0 using `--loader` instead
+
 ```shell
 $ node --experimental-loader pp-finder ./index.js
+$ node --loader pp-finder ./index.js
 ```
 
 From now, if you run the application, it will output all the available candidates:
@@ -86,18 +89,57 @@ Now, if you issue a request to that server, even more candidate show up:
 
 You can configure the behaviour of PP finder using env variable:
 
-| Environment      | Type                        | Description                                            |
-| :--------------- | :-------------------------- | :----------------------------------------------------- |
-| PPF_CONFIG_PATH  | string                      | Path to config file, defaults to `./ppf.config.json`   |
-| PPF_LOGONCE      | bool                        | Only log each finding once, defaults to `false`        |
-| PPF_COLOR        | 'auto', 'always' or 'never' | Disable colorization, defaults to `false`              |
-| PPF_WRAPPER_NAME | string                      | Wrapper name, defaults to `ø`                          |
-| PPF_POLLUTABLE   | string[], comma separated   | Pollutable objects, defaults to `["Object.prototype"]` |
-| PPF_LOG_FORIN    | bool                        | Log `for (y in x)` gadgets, defaults to `true`         |
-| PPF_LOG_ISIN     | bool                        | Log `y in x` gadgets, defaults to `true`               |
-| PPF_LOG_PROP     | bool                        | Log `x.y` gadgets, defaults to `true`                  |
-| PPF_LOG_ELEM     | bool                        | Log `x[y]` gadgets, defaults to `true`                 |
-| PPF_LOG_BIND     | bool                        | Log `{y} = x` gadgets, defaults to `true`              |
+| Environment      | Type                        | Description                                                                  |
+| :--------------- | :-------------------------- | :--------------------------------------------------------------------------- |
+| PPF_WRAPPER_NAME | string                      | Wrapper name, defaults to `ø`                                                |
+| PPF_LOGONCE      | bool                        | Only log each finding once, defaults to `false`                              |
+| PPF_COLOR        | 'auto', 'always' or 'never' | Disable colorization, defaults to `auto`                                     |
+| PPF_LAZYSTART    | bool                        | Lazy start whether to wait for `pp-finder start` or not, defaults to `false` |
+| PPF_LOGFILE      | string                      | File to log gadgets to                                                       |
+| PPF_POLLUTABLES  | string[]                    | Pollutable objects. Defaults to `["Object"]`                                 |
+| PPF_AGENT        | 'loader', 'node','browser'  | Agent to use. Defaults to `loader`                                           |
+| PPF_TRANSFORMERS | string[]                    | Transformers to use. Defaults to `all`                                       |
+
+
+### PPF_TRANSFORMERS
+
+You can choose which transformers to use for the compilation. By defaults all are selected:
+
+```ts
+const defaultTransformers = [
+  'elementAccess',
+  'expressionStatement',
+  'callExpression',
+  'propertyAccess',
+  'variableDeclaration',
+  'objectLiteral',
+  'forInStatement',
+  'InExpression',
+  'arrowFunction',
+  'functionDeclaration',
+  'functionExpression',
+];
+```
+
+Example (Only forIn and elem are used): 
+
+```shell
+$ PPF_TRANSFORMERS=forInStatement,elementAccess node --loader pp-finder ../targets/express/index.js
+[PP][forIn] _ [...]/targets/express/node_modules/debug/src/debug.js 47:13
+[PP][forIn] _ [...]/targets/express/node_modules/safe-buffer/index.js 8:19
+[PP][forIn] _ [...]/targets/express/node_modules/debug/src/debug.js 47:13
+[PP][forIn] _ [...]/targets/express/node_modules/mime/mime.js 22:20
+[PP][elem]  0 [...]/targets/express/node_modules/mime/mime.js 35:36
+[PP][elem]  0 [...]/targets/express/node_modules/mime/mime.js 35:36
+[PP][elem]  0 [...]/targets/express/node_modules/mime/mime.js 35:36
+```
+
+## Dev
+
+```shell
+$ yarn dev
+$ node --loader ./dist/loader.cjs file.js
+```
 
 ## Tests
 
@@ -160,6 +202,4 @@ $ yarn test
   38 passing (72ms)
 
 Done in 1.61s.
-
-
 ```

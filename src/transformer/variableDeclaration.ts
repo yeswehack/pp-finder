@@ -2,7 +2,7 @@ import ts from "typescript";
 import { defineTransformer, iterBindingPatternPath } from "./utils";
 
 // const {y} = x;
-export default defineTransformer((node, utils) => {
+export default defineTransformer('variableDeclaration', (node, utils) => {
   // Check
   if (
     !ts.isVariableDeclaration(node) ||

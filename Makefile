@@ -18,7 +18,7 @@ watch:
 		inotifywait -qre close_write .; \
 	done
 
-test: loader compiler .WAIT ${SOURCES} ${TESTS}
+test: loader compiler ${SOURCES} ${TESTS}
 	@echo "Starting tests"
 	@ts-node ./test/main.ts
 

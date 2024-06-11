@@ -1,18 +1,34 @@
-import { z } from "zod";
 import { existsSync, readFileSync } from "fs";
+import { z } from "zod";
 
 type DeepPartial<T> = {
   [L in keyof T]?: T[L] extends any[]
-    ? T[L]
-    : T[L] extends object
-    ? DeepPartial<T[L]>
-    : T[L];
+  ? T[L]
+  : T[L] extends object
+  ? DeepPartial<T[L]>
+  : T[L];
 };
 
 type PPFPartialConfig = DeepPartial<PPFConfig>;
 
 const colorModeParser = z.enum(["auto", "always", "never"]);
 const agentParser = z.enum(["loader", "node", "browser"]);
+
+const defaultTransformers = [
+  'elementAccess',
+  'expressionStatement',
+  'callExpression',
+  'propertyAccess',
+  'variableDeclaration',
+  'objectLiteral',
+  'forInStatement',
+  'InExpression',
+  'arrowFunction',
+  'functionDeclaration',
+  'functionExpression',
+];
+
+const transformersParser = z.array(z.string()).default(defaultTransformers)
 
 export const jsonParser = z
   .object({
@@ -28,22 +44,13 @@ export const jsonParser = z
       .boolean()
       .default(false)
       .describe('Whether to wait for "pp-finder start" or not'),
-    log: z
-      .object({
-        ForIn: z.boolean().default(true).describe("Log `for (y in x)` gadgets"),
-        IsIn: z.boolean().default(true).describe("Log `y in x` gadgets"),
-        Prop: z.boolean().default(true).describe("Log `x.y` gadgets"),
-        Elem: z.boolean().default(true).describe("Log `x[y]` gadgets"),
-        Bind: z.boolean().default(true).describe("Log `{y} = x` gadgets"),
-      })
-      .default({})
-      .describe("Define witch gadgets to log"),
     logFile: z.string().default("").describe("File to log gadgets to"),
     pollutables: z
       .array(z.string())
       .default(["Object"])
       .describe("Pollutable objects"),
     agent: agentParser.default("loader").describe("Agent to use"),
+    transformers: transformersParser.describe("Transformers to use")
   })
   .default({})
   .describe("PP Finder configuration file");
@@ -61,14 +68,10 @@ const envParser = z
     PPF_LOGONCE: coerceBoolean,
     PPF_COLOR: colorModeParser,
     PPF_LAZYSTART: coerceBoolean,
-    PPF_LOG_FORIN: coerceBoolean,
-    PPF_LOG_ISIN: coerceBoolean,
-    PPF_LOG_PROP: coerceBoolean,
-    PPF_LOG_ELEM: coerceBoolean,
-    PPF_LOG_BIND: coerceBoolean,
     PPF_LOGFILE: z.string(),
     PPF_POLLUTABLES: z.string(),
     PPF_AGENT: agentParser,
+    PPF_TRANSFORMERS: z.string()
   })
   .partial()
   .transform(
@@ -77,15 +80,9 @@ const envParser = z
       logOnce: env.PPF_LOGONCE,
       color: env.PPF_COLOR,
       lazyStart: env.PPF_LAZYSTART,
-      log: {
-        ForIn: env.PPF_LOG_FORIN,
-        IsIn: env.PPF_LOG_ISIN,
-        Prop: env.PPF_LOG_PROP,
-        Elem: env.PPF_LOG_ELEM,
-        Bind: env.PPF_LOG_BIND,
-      },
       logFile: env.PPF_LOGFILE,
       pollutables: env.PPF_POLLUTABLES?.split(","),
+      transformers: env.PPF_TRANSFORMERS === "all" ? defaultTransformers : env.PPF_TRANSFORMERS?.split(","),
       agent: env.PPF_AGENT,
     })
   );
@@ -111,17 +108,11 @@ function mergeConfigs(...configs: PPFPartialConfig[]): PPFConfig {
       agent: config.agent ?? acc.agent,
       color: config.color ?? acc.color,
       lazyStart: config.lazyStart ?? acc.lazyStart,
-      log: {
-        ForIn: config.log?.ForIn ?? acc.log.ForIn,
-        IsIn: config.log?.IsIn ?? acc.log.IsIn,
-        Prop: config.log?.Prop ?? acc.log.Prop,
-        Elem: config.log?.Elem ?? acc.log.Elem,
-        Bind: config.log?.Bind ?? acc.log.Bind,
-      },
       logFile: config.logFile ?? acc.logFile,
       logOnce: config.logOnce ?? acc.logOnce,
       pollutables: config.pollutables ?? acc.pollutables,
       wrapperName: config.wrapperName ?? acc.wrapperName,
+      transformers: config.transformers ?? acc.transformers
     };
   }, defaultConfig);
 }

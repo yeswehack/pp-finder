@@ -2,7 +2,7 @@ import ts from "typescript";
 import { defineTransformer } from "./utils";
 
 // for (let y in x)
-export default defineTransformer((node, utils) => {
+export default defineTransformer('forInStatement', (node, utils) => {
   // Check
   if (!ts.isForInStatement(node)) {
     return null;

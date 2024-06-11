@@ -28,7 +28,11 @@ async function runTest(testPath: string, resultPath: string) {
     .execFileSync(
       "node",
       ["--experimental-loader", "./dist/loader.cjs", "--no-warnings", testPath],
-      {}
+      {
+        env: {
+          'PPF_COLOR': 'never'
+        }
+      }
     )
     .toString()
     .trim();

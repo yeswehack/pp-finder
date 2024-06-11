@@ -1,7 +1,7 @@
 import ts from "typescript";
+import { PPFConfig } from "./config";
 import { transformers } from "./transformer";
 import { PPTransformerUtils } from "./transformer/utils";
-import { PPFConfig } from "./config";
 
 export function compile(context: PPFConfig, source: string) {
   if (source.startsWith("#!")) {
@@ -39,7 +39,8 @@ export function compile(context: PPFConfig, source: string) {
 
     const visit: ts.Visitor = (node) => {
       for (const transformer of transformers) {
-        const newNode = transformer(node, utils);
+        if (!context.transformers.includes(transformer.name)) continue;
+        const newNode = transformer.func(node, utils);
         if (newNode) {
           return newNode;
         }
