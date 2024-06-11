@@ -114,7 +114,7 @@ const defaultTransformers = [
   'variableDeclaration',
   'objectLiteral',
   'forInStatement',
-  'InExpression',
+  'inExpression',
   'arrowFunction',
   'functionDeclaration',
   'functionExpression',
@@ -147,59 +147,24 @@ Tests indicate what the library handles in terms of AST visitors:
 
 ```shell
 $ yarn test
-  Hooks
-    PropertyAccessExpression
-      ✔️ Valid Gadget     | ({}).y
-      ✔️ Not Valid Gadget | ({y: 42}).y
-      ✔️ Not Valid Gadget | (Object.create(null)).y
-      ✔️ Valid Gadget     | ({y: {}}).y.z
-    ElementAccessExpression
-      ✔️ Valid Gadget     | ({})['y']
-      ✔️ Not Valid Gadget | ({y: 42})['y']
-      ✔️ Not Valid Gadget | (Object.create(null))['y']
-      ✔️ Valid Gadget     | ({y: {}})['y']['z']
-    ForInStatement
-      ✔️ Valid Gadget     | for(let y in ({})){}
-      ✔️ Not Valid Gadget | for(let y in (Object.create(null))){}
-    ArrowFunctionDeclaration
-      ✔️ Valid Gadget     | (({y}) => (0))({})
-      ✔️ Valid Gadget     | (({y}, a, {z}) => (0))({}, 0, {})
-      ✔️ Valid Gadget     | (({y: z}) => (0))({})
-    FunctionDeclaration
-      ✔️ Valid Gadget     | function f({y}){return};f({})
-      ✔️ Valid Gadget     | function f({y}, a, {z}){return};f({}, 42, {})
-      ✔️ Valid Gadget     | function f({y: z}){return};f({})
-      ✔️ Valid Gadget     | function f({['y']: z}){return};f({})
-    FunctionExpression
-      ✔️ Valid Gadget     | (function ({y}){return})({})
-      ✔️ Valid Gadget     | (function ({y}, a, {z}){return})({}, 0, {})
-      ✔️ Valid Gadget     | (function ({y: z}){return})({})
-      ✔️ Valid Gadget     | (function ({['y']: z}){return})({})
-    InExpression
-      ✔️ Valid Gadget     | ("y" in {})
-      ✔️ Not Valid Gadget | ("y" in {y: 42})
-      ✔️ Not Valid Gadget | ("y" in Object.create(null))
-    ObjectLiteral
-      ✔️ Valid Gadget     | ({y} = {});
-      ✔️ Valid Gadget     | ({y: {z}} = {y: {}});
-      ✔️ Not Valid Gadget | ({y} = {y: 42});
-      ✔️ Not Valid Gadget | ({y} = Object.create(null));
-      ✔️ Valid Gadget     | ({['y']: y} ={});
-    VariableDeclaration
-      ✔️ Valid Gadget     | const {y} = {};
-      ✔️ Valid Gadget     | const {y} = {}, {z} = {};
-      ✔️ Valid Gadget     | const {y: {z}} = {y: {}};
-      ✔️ Not Valid Gadget | const {y} = {y: 42};
-      ✔️ Valid Gadget     | const {['y']: y} ={};
-      ✔️ Not Valid Gadget | const {y} = Object.create(null);
-      ✔️ Valid Gadget     | let z; const {y} = {z} = {};
-
-  Assignation check
-    ✔️ const x = {}; x.y = 42; x.y
-    ✔️ const x = {}; x['y'] = 42; x.y
-
-
-  38 passing (72ms)
-
-Done in 1.61s.
+Building loader
+Building compiler
+Starting tests
+Running test: arrowFunctionDeclaration.test.js
+Running test: assignation.test.js
+Running test: awaitAssign.test.js
+Running test: classPrivateFields.test.js
+Running test: elementAccessExpression.test.js
+Running test: eval.test.js
+Running test: forInStatement.test.js
+Running test: functionCall.test.js
+Running test: functionDeclaration.test.js
+Running test: functionExpression.test.js
+Running test: inExpression.test.js
+Running test: lazyStart.test.js
+Running test: nullish.test.js
+Running test: objectLiteral.test.js
+Running test: propertAccessExpression.test.js
+Running test: statefullGetter.test.js
+Running test: variableDeclaration.test.js
 ```

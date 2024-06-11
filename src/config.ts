@@ -22,7 +22,7 @@ const defaultTransformers = [
   'variableDeclaration',
   'objectLiteral',
   'forInStatement',
-  'InExpression',
+  'inExpression',
   'arrowFunction',
   'functionDeclaration',
   'functionExpression',

@@ -27,10 +27,11 @@ async function runTest(testPath: string, resultPath: string) {
   const result = child_process
     .execFileSync(
       "node",
-      ["--experimental-loader", "./dist/loader.cjs", "--no-warnings", testPath],
+      ["--loader", "./dist/loader.cjs", "--no-warnings", testPath],
       {
         env: {
-          'PPF_COLOR': 'never'
+          ...process.env,
+          'PPF_COLOR': 'never',
         }
       }
     )
