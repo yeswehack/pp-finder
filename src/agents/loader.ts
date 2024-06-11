@@ -76,14 +76,13 @@ export default defineAgent((config, utils, root: string) => {
     const shouldColorize = ["always", "auto"].includes(config.color);
 
     const keyStr = key || '_';
-    const pathStr = key ? shortPath : path;
 
     if (!shouldColorize) {
-      console.log(`[PP][${op}] ${keyStr} at ${pathStr}:${loc}`);
+      console.log(`[PP][${op}] ${keyStr} at ${shortPath}:${loc}`);
       return
     }
 
-    const msg = [keyStr, pathStr, loc];
+    const msg = [keyStr, shortPath, loc];
 
     console.log(`${format("PP", "PP", "[]")}${format(op, op, "[]")} ${msg.join(" ")}`);
   });
