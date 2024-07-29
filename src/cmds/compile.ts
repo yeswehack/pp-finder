@@ -9,6 +9,13 @@ export default command({
   name: "compile",
   description: "Compile the specified file",
   args: {
+    agent: option({
+      type: optional(string),
+      long: "agent",
+      short: "a",
+      description: "Agent to use, browser or node",
+      defaultValue: () => "node",
+    }),
     file: positional({
       type: string,
       description: "File to compile",
@@ -19,14 +26,8 @@ export default command({
       short: "o",
       description: "Output folder path",
     }),
-    compilerPath: option({
-      type: optional(string),
-      long: "compiler-path",
-      short: "c",
-      description: "Force compiler import path",
-    }),
   },
-  async handler({ file: filePath, output: outputFilePath, compilerPath }) {
+  async handler({ file: filePath, output: outputFilePath, agent: agentName }) {
     const config = loadConfig();
     const input = filePath === "-" ? process.stdin : createReadStream(filePath);
 
@@ -39,12 +40,17 @@ export default command({
 
     const jsonConfig = JSON.stringify(config);
 
-    const agent = agents["node"]; // TODO: conditional browser
+    if (agentName !== "browser" && agentName !== "node") {
+      throw new Error("Agent must be either browser or node");
+    }
+
+    const agent = agents[agentName];
     let compiledSource = "";
-    compiledSource += `globalThis.${config.wrapperName
-      } = (${agent})(${jsonConfig},(${agents.utils})() ,${JSON.stringify(
-        compilerPath
-      )});`;
+    compiledSource += `globalThis.${
+      config.wrapperName
+    } = (${agent})(${jsonConfig},(${agents.utils}), ${JSON.stringify(
+      filePath
+    )});`;
     compiledSource += "\n".repeat(3);
     compiledSource += compile(config, fileData);
 

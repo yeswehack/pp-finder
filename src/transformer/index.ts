@@ -13,7 +13,7 @@ import variableDeclarationTransformer from "./variableDeclaration";
 export const transformers = [
   elementAccessTransformer,
   expressionStatementTransformer,
-  callExpressionTransformer,
+  //callExpressionTransformer,
   propertyAccessTransformer,
   variableDeclarationTransformer,
   objectLiteralTransformer,

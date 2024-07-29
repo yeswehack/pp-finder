@@ -43,7 +43,7 @@ export const globalPreload: GlobalPreloadHook = function () {
   const agent = agents[config.agent];
   return `globalThis.${config.wrapperName} = (
   ${agent})(${context}, 
-  (${agents.utils})() ,
+  (${agents.utils}),
   ${JSON.stringify(__dirname)}
 );`;
 };

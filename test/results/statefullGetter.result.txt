@@ -4,8 +4,8 @@
 3
 4
 4
-[PP][elem] x at test/tests/statefullGetter.test.js:20:17
+[PP][elem] "x" at test/tests/statefullGetter.test.js:20:17
 undefined
-[PP][elem] x at test/tests/statefullGetter.test.js:21:17
+[PP][elem] "x" at test/tests/statefullGetter.test.js:21:17
 undefined
 7
