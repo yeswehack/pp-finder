@@ -32,6 +32,7 @@ const transformersParser = z.array(z.string()).default(defaultTransformers)
 
 export const jsonParser = z
   .object({
+    $schema: z.string().optional(),
     logOnce: z
       .boolean()
       .default(false)
