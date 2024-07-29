@@ -25,8 +25,13 @@ type GlobalPreloadHook = () => string;
 
 const config = loadConfig();
 
+const skipRegex = config.skip && new RegExp(config.skip);
 export const load: LoadHook = async function (url, context, nextLoad) {
   const r = await nextLoad(url, context);
+  if (skipRegex && skipRegex.test(url)) {
+    return r;
+  }
+
   if (context.format === "module" && r.source) {
     r.source = compile(config, r.source.toString());
   }

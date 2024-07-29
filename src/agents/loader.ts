@@ -20,13 +20,18 @@ export default defineAgent((config, utils, root: string) => {
   const { compile } =
     require(`${root}/compiler.js`) as typeof import("../compiler");
 
+  const skipRegex = config.skip && new RegExp(config.skip);
+
   function processHookRequire() {
     const _require = Module.prototype.require;
     const _wrap = Module.wrap;
 
     // Modify the require function to compile the module before loading it
     const ppfRequire = function (this: typeof Module, id: string) {
-      if (Module.builtinModules.includes(id)) {
+      if (
+        Module.builtinModules.includes(id) ||
+        (skipRegex && skipRegex.test(id))
+      ) {
         return _require.apply(this, [id]);
       }
 
@@ -47,7 +52,6 @@ export default defineAgent((config, utils, root: string) => {
   }
   processHookRequire();
 
-
   const colorMap: Record<string, string> = {
     reset: "\x1b[0m",
     PP: "\x1b[34m",
@@ -56,6 +60,7 @@ export default defineAgent((config, utils, root: string) => {
     forIn: "\x1b[31m",
     isIn: "\x1b[33m",
     prop: "\x1b[36m",
+    key: "\x1b[0;33m",
   } as const;
 
   const format = (color: keyof typeof colorMap, text: string, wraps = "") => {
@@ -75,17 +80,19 @@ export default defineAgent((config, utils, root: string) => {
     const loc = `${pos[0]}:${pos[1]}`;
     const shouldColorize = ["always", "auto"].includes(config.color);
 
-    const keyStr = key || '_';
+    const keyStr = key || "_";
     const pathStr = key ? shortPath : path;
 
     if (!shouldColorize) {
       console.log(`[PP][${op}] ${keyStr} at ${pathStr}:${loc}`);
-      return
+      return;
     }
 
-    const msg = [keyStr, pathStr, loc];
+    const msg = [format("key", JSON.stringify(keyStr)), pathStr, loc];
 
-    console.log(`${format("PP", "PP", "[]")}${format(op, op, "[]")} ${msg.join(" ")}`);
+    console.log(
+      `${format("PP", "PP", "[]")}${format(op, op, "[]")} ${msg.join(" ")}`
+    );
   });
 
   return {

@@ -50,7 +50,8 @@ export const jsonParser = z
       .default(["Object"])
       .describe("Pollutable objects"),
     agent: agentParser.default("loader").describe("Agent to use"),
-    transformers: transformersParser.describe("Transformers to use")
+    transformers: transformersParser.describe("Transformers to use"),
+    skip: z.string().default("").describe("Skip files with this pattern"),
   })
   .default({})
   .describe("PP Finder configuration file");
@@ -72,12 +73,14 @@ const envParser = z
     PPF_POLLUTABLES: z.string(),
     PPF_TRANSFORMERS: z.string(),
     PPF_AGENT: agentParser,
+    PPF_SKIP: z.string(),
   })
   .partial()
   .transform(
     (env): PPFPartialConfig => ({
       wrapperName: env.PPF_WRAPPER_NAME,
       logOnce: env.PPF_LOGONCE,
+      skip: env.PPF_SKIP,
       color: env.PPF_COLOR,
       lazyStart: env.PPF_LAZYSTART,
       logFile: env.PPF_LOGFILE,
@@ -112,14 +115,15 @@ function mergeConfigs(...configs: PPFPartialConfig[]): PPFConfig {
       logOnce: config.logOnce ?? acc.logOnce,
       pollutables: config.pollutables ?? acc.pollutables,
       wrapperName: config.wrapperName ?? acc.wrapperName,
-      transformers: config.transformers ?? acc.transformers
+      transformers: config.transformers ?? acc.transformers,
+      skip: config.skip ?? acc.skip
     };
   }, defaultConfig);
 }
 
 export const defaultConfig: PPFConfig = jsonParser.parse({});
 export function loadConfig() {
-  const filename = process.env.PPF_CONFIG_FILE || "pp-finder.json";
+  const filename = process.env.PPF_CONFIG || "pp-finder.json";
 
   const fileConfig = loadFileConfig(filename);
   const envConfig = envParser.parse(process.env);
