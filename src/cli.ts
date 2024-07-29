@@ -16,11 +16,3 @@ const app = subcommands({
 });
 
 runCli(app, process.argv.slice(2));
-
-// compilehtml
-
-// js/html
-// Hook response
-// pp.finder
-
-// hook request
