@@ -10,6 +10,7 @@ declare function getBuiltin<T>(module: string): T;
 export default defineAgent((config, utils, root: string) => {
   const process = getBuiltin<typeof import("process")>("process");
   const Module = getBuiltin<typeof import("module")>("module");
+  const Path = getBuiltin<typeof import("path")>("path");
   const pollutables = config.pollutables.map((p) => eval(p));
   const elemMap = new Map<any, any>();
   const require = Module.createRequire(process.cwd());
@@ -76,19 +77,18 @@ export default defineAgent((config, utils, root: string) => {
     path: string;
     pos: [number, number];
   }>(config, ({ op, key, path, pos }) => {
-    const shortPath = path.replace(process.cwd(), ".");
+    const shortPath = Path.relative(process.cwd(), path);
     const loc = `${pos[0]}:${pos[1]}`;
     const shouldColorize = ["always", "auto"].includes(config.color);
 
     const keyStr = key || "_";
-    const pathStr = key ? shortPath : path;
 
     if (!shouldColorize) {
-      console.log(`[PP][${op}] ${keyStr} at ${pathStr}:${loc}`);
+      console.log(`[PP][${op}] ${keyStr} at ${shortPath}:${loc}`);
       return;
     }
 
-    const msg = [format("key", JSON.stringify(keyStr)), pathStr, loc];
+    const msg = [format("key", JSON.stringify(keyStr)), shortPath, loc];
 
     console.log(
       `${format("PP", "PP", "[]")}${format(op, op, "[]")} ${msg.join(" ")}`

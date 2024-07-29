@@ -1,2 +1,2 @@
-[PP][prop] y at ./test/tests/awaitAssign.test.js:4:11
-[PP][elem] y at ./test/tests/awaitAssign.test.js:5:11
+[PP][prop] y at test/tests/awaitAssign.test.js:4:11
+[PP][elem] y at test/tests/awaitAssign.test.js:5:11

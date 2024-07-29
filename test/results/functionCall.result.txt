@@ -1,2 +1,2 @@
-[PP][prop] y at ./test/tests/functionCall.test.js:3:4
-[PP][prop] y at ./test/tests/functionCall.test.js:4:4
+[PP][prop] y at test/tests/functionCall.test.js:3:4
+[PP][prop] y at test/tests/functionCall.test.js:4:4

@@ -1,1 +1,1 @@
-[PP][prop] y at ./test/tests/nullish.test.js:3:14
+[PP][prop] y at test/tests/nullish.test.js:3:14

@@ -1,3 +1,3 @@
-[PP][bind] y at ./test/tests/objectLiteral.test.js:1:10
-[PP][bind] y.z at ./test/tests/objectLiteral.test.js:5:5
-[PP][bind] y at ./test/tests/objectLiteral.test.js:11:17
+[PP][bind] y at test/tests/objectLiteral.test.js:1:10
+[PP][bind] y.z at test/tests/objectLiteral.test.js:5:5
+[PP][bind] y at test/tests/objectLiteral.test.js:11:17

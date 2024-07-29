@@ -1,2 +1,2 @@
-[PP][elem] y at ./test/tests/elementAccessExpression.test.js:1:6
-[PP][elem] z at ./test/tests/elementAccessExpression.test.js:4:18
+[PP][elem] y at test/tests/elementAccessExpression.test.js:1:6
+[PP][elem] z at test/tests/elementAccessExpression.test.js:4:18

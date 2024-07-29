@@ -1,2 +1,2 @@
-[PP][prop] y at ./test/tests/propertAccessExpression.test.js:1:6
-[PP][prop] z at ./test/tests/propertAccessExpression.test.js:4:15
+[PP][prop] y at test/tests/propertAccessExpression.test.js:1:6
+[PP][prop] z at test/tests/propertAccessExpression.test.js:4:15
