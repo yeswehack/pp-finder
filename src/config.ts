@@ -3,32 +3,31 @@ import { z } from "zod";
 
 type DeepPartial<T> = {
   [L in keyof T]?: T[L] extends any[]
-  ? T[L]
-  : T[L] extends object
-  ? DeepPartial<T[L]>
-  : T[L];
+    ? T[L]
+    : T[L] extends object
+    ? DeepPartial<T[L]>
+    : T[L];
 };
 
 type PPFPartialConfig = DeepPartial<PPFConfig>;
 
-const colorModeParser = z.enum(["auto", "always", "never"]);
 const agentParser = z.enum(["loader", "node", "browser"]);
 
 const defaultTransformers = [
-  'elementAccess',
-  'expressionStatement',
+  "elementAccess",
+  "expressionStatement",
   // 'callExpression', // TODO: unstable, doesn't work for some target
-  'propertyAccess',
-  'variableDeclaration',
-  'objectLiteral',
-  'forInStatement',
-  'inExpression',
-  'arrowFunction',
-  'functionDeclaration',
-  'functionExpression',
+  "propertyAccess",
+  "variableDeclaration",
+  "objectLiteral",
+  "forInStatement",
+  "inExpression",
+  "arrowFunction",
+  "functionDeclaration",
+  "functionExpression",
 ];
 
-const transformersParser = z.array(z.string()).default(defaultTransformers)
+const transformersParser = z.array(z.string()).default(defaultTransformers);
 
 export const jsonParser = z
   .object({
@@ -38,8 +37,9 @@ export const jsonParser = z
       .default(false)
       .describe("Whether to log each gadget once or not"),
     wrapperName: z.string().default("ø").describe("Wrapper name"),
-    color: colorModeParser
-      .default("auto")
+    color: z
+      .boolean()
+      .default(true)
       .describe("Whether to colorize the output or not"),
     lazyStart: z
       .boolean()
@@ -68,7 +68,7 @@ const envParser = z
   .object({
     PPF_WRAPPER_NAME: z.string(),
     PPF_LOGONCE: coerceBoolean,
-    PPF_COLOR: colorModeParser,
+    PPF_COLOR: coerceBoolean,
     PPF_LAZYSTART: coerceBoolean,
     PPF_LOGFILE: z.string(),
     PPF_POLLUTABLES: z.string(),
@@ -86,7 +86,10 @@ const envParser = z
       lazyStart: env.PPF_LAZYSTART,
       logFile: env.PPF_LOGFILE,
       pollutables: env.PPF_POLLUTABLES?.split(","),
-      transformers: env.PPF_TRANSFORMERS === "all" ? defaultTransformers : env.PPF_TRANSFORMERS?.split(","),
+      transformers:
+        env.PPF_TRANSFORMERS === "all"
+          ? defaultTransformers
+          : env.PPF_TRANSFORMERS?.split(","),
       agent: env.PPF_AGENT,
     })
   );
@@ -117,7 +120,7 @@ function mergeConfigs(...configs: PPFPartialConfig[]): PPFConfig {
       pollutables: config.pollutables ?? acc.pollutables,
       wrapperName: config.wrapperName ?? acc.wrapperName,
       transformers: config.transformers ?? acc.transformers,
-      skip: config.skip ?? acc.skip
+      skip: config.skip ?? acc.skip,
     };
   }, defaultConfig);
 }

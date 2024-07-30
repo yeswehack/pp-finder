@@ -24,7 +24,7 @@ export default defineAgent((config, createLogger) => {
     const prefix = wraps.length == 2 ? wraps[0] : "";
     const suffix = wraps.length == 2 ? wraps[1] : "";
 
-    if (config.color === "never") {
+    if (!config.color) {
       return `${prefix}${text}${suffix}`;
     }
 
