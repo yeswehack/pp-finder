@@ -46,7 +46,7 @@ export default command({
 
     const agent = agents[agentName];
     let compiledSource = "";
-    compiledSource += `globalThis.${
+    compiledSource += `const ${
       config.wrapperName
     } = (${agent})(${jsonConfig},(${agents.utils}), ${JSON.stringify(
       filePath
