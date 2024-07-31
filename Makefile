@@ -21,7 +21,7 @@ watch:
 
 test: loader compiler $(SOURCES) $(TESTS)
 	@echo "Starting tests"
-	@ts-node ./test/main.ts
+	@yarn run ts-node ./test/main.ts
 
 define build_rule
 	@echo "Building $(1)"
