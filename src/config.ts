@@ -3,10 +3,10 @@ import { z } from "zod";
 
 type DeepPartial<T> = {
   [L in keyof T]?: T[L] extends any[]
-    ? T[L]
-    : T[L] extends object
-    ? DeepPartial<T[L]>
-    : T[L];
+  ? T[L]
+  : T[L] extends object
+  ? DeepPartial<T[L]>
+  : T[L];
 };
 
 type PPFPartialConfig = DeepPartial<PPFConfig>;
@@ -45,7 +45,6 @@ export const jsonParser = z
       .boolean()
       .default(false)
       .describe('Whether to wait for "pp-finder start" or not'),
-    logFile: z.string().default("").describe("File to log gadgets to"),
     pollutables: z
       .array(z.string())
       .default(["Object"])
@@ -70,7 +69,6 @@ const envParser = z
     PPF_LOGONCE: coerceBoolean,
     PPF_COLOR: coerceBoolean,
     PPF_LAZYSTART: coerceBoolean,
-    PPF_LOGFILE: z.string(),
     PPF_POLLUTABLES: z.string(),
     PPF_TRANSFORMERS: z.string(),
     PPF_AGENT: agentParser,
@@ -84,7 +82,6 @@ const envParser = z
       skip: env.PPF_SKIP,
       color: env.PPF_COLOR,
       lazyStart: env.PPF_LAZYSTART,
-      logFile: env.PPF_LOGFILE,
       pollutables: env.PPF_POLLUTABLES?.split(","),
       transformers:
         env.PPF_TRANSFORMERS === "all"
@@ -115,7 +112,6 @@ function mergeConfigs(...configs: PPFPartialConfig[]): PPFConfig {
       agent: config.agent ?? acc.agent,
       color: config.color ?? acc.color,
       lazyStart: config.lazyStart ?? acc.lazyStart,
-      logFile: config.logFile ?? acc.logFile,
       logOnce: config.logOnce ?? acc.logOnce,
       pollutables: config.pollutables ?? acc.pollutables,
       wrapperName: config.wrapperName ?? acc.wrapperName,

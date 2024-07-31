@@ -1,13 +1,13 @@
 
-"stop pp-finder";
+"pp-finder stop";
 ({}).a;
 ({}).b;
 ({}).c;
 
-function test(){
-  "start pp-finder";
+function test() {
+  "pp-finder start";
   ({}).x;
-  "stop pp-finder";
+  "pp-finder stop";
 }
 
 

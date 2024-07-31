@@ -1,4 +1,4 @@
-# pp-finder
+# PP-Finder
 
 Prototype pollution finder tool for javascript. pp-finder lets you find prototype pollution candidates in your code. The main purpose of this tool is to help hackers in there prototype pollution researchs by highlighting potential candidate in the source code.
 
@@ -26,7 +26,7 @@ $ yarn global add pp-finder
 
 ## Getting started
 
-For instance, let's find candidates in the popular express library:
+For instance, let's find prototype pollution gadgets in the popular express library:
 
 ```
 $ mkdir -p target/express
@@ -52,54 +52,85 @@ app.listen(port, () => {
 
 To hunt for prototype pollution gadgets, pp-finder will parse the javascript source code of every file it finds in the provided directory.
 
-It will use the `--experimental-loader` options from nodejs to perform ast modifications on the fly (Tested with node v18.18.2).
-
-> Also tested with node v20.2.0 using `--loader` instead
+It will use the `--loader` options from nodejs to perform ast modifications on the fly.
 
 ```shell
-$ node --experimental-loader pp-finder ./index.js
 $ node --loader pp-finder ./index.js
 ```
 
-From now, if you run the application, it will output all the available candidates:
+Alternatively, you can use the **pp-finder** CLI:
+
+```shell
+$ pp-finder run node ./index.js
+```
+
+From now, if you run the application, it will output all the potential gadgets:
 
 ```
-[PP][IsIn "colors"] node_modules/debug/src/node.js:76:22
-[PP][ForIn] node_modules/safer-buffer/safer.js:12:13
-[PP][IsIn "colors"] node_modules/debug/src/node.js:76:22
-[PP][IsIn "colors"] node_modules/debug/src/node.js:76:22
-[PP][IsIn "colors"] node_modules/debug/src/node.js:76:22
-[PP][Prop noDeprecation] node_modules/depd/index.js:154:15
-[...]
+[PP][prop] "prepareStackTrace" at node_modules/depd/index.js:384:20
+[PP][prop] "noDeprecation" at node_modules/depd/index.js:154:15
+[PP][prop] "NO_DEPRECATION" at node_modules/depd/index.js:159:25
+[PP][prop] "traceDeprecation" at node_modules/depd/index.js:170:15
+[PP][prop] "TRACE_DEPRECATION" at node_modules/depd/index.js:175:25
+[PP][prop] "hasOwnProperty" at node_modules/merge-descriptors/index.js:22:39
+[PP][prop] "type" at node_modules/debug/src/index.js:6:47
+[PP][prop] "DEBUG_FD" at node_modules/debug/src/node.js:61:31
+[PP][prop] "DEBUG" at node_modules/debug/src/node.js:157:22
+[PP][prop] "DEBUG" at node_modules/debug/src/node.js:143:24
+[PP][isIn] "colors" at node_modules/debug/src/node.js:76:22
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
 Example app listening on port 3000
 ```
 
-Now, if you issue a request to that server, even more candidate show up:
+Now, if you issue a request to that server, more gadgets show up:
 
 ```
-[PP][Prop params] node_modules/express/lib/router/index.js:156:26
-[PP][Prop baseUrl] node_modules/express/lib/router/index.js:157:23
-[PP][Elem "baseUrl"] node_modules/express/lib/router/index.js:637:19
-[PP][Elem "next"] node_modules/express/lib/router/index.js:637:19
-[PP][Elem "params"] node_modules/express/lib/router/index.js:637:19
+[PP][elem] "filename" at node_modules/ejs/lib/utils.js:167:23
+[PP][elem] "async" at node_modules/ejs/lib/utils.js:167:23
+[PP][prop] "scope" at node_modules/ejs/lib/ejs.js:387:20
+[PP][forIn] "_" at node_modules/ejs/lib/utils.js:243:17
+[PP][prop] "openDelimiter" at node_modules/ejs/lib/ejs.js:523:57
+[PP][prop] "closeDelimiter" at node_modules/ejs/lib/ejs.js:524:59
+[PP][prop] "delimiter" at node_modules/ejs/lib/ejs.js:525:49
+[PP][isIn] "ctime" at node_modules/etag/index.js:112:16
+[PP][elem] "if-modified-since" at node_modules/fresh/index.js:35:34
+[PP][elem] "if-none-match" at node_modules/fresh/index.js:36:30
 [...]
+```
+
+## CLI
+
+```shell
+$ pp-finder --help
+PP Finder <subcommand>
+> Find prototype pollution gadget in javascript code
+
+where <subcommand> can be one of:
+
+- init - Create a ppfinder.json file in the current directory
+- compile - Compile the specified file
+- run - Run a command with pp-finder:
+  ex: pp-finder run -c ./ppfinder.json  -- node test.js
+
+For more help, try running `PP Finder <subcommand> --help`
 ```
 
 ## Runtime Configuration
 
-You can configure the behaviour of PP finder using env variable:
+You can generate the default pp-finder configuration file using `pp-finder init`.
 
-| Environment      | Type                        | Description                                                                  |
-| :--------------- | :-------------------------- | :--------------------------------------------------------------------------- |
-| PPF_WRAPPER_NAME | string                      | Wrapper name, defaults to `ø`                                                |
-| PPF_LOGONCE      | bool                        | Only log each finding once, defaults to `false`                              |
-| PPF_COLOR        | 'auto', 'always' or 'never' | Disable colorization, defaults to `auto`                                     |
-| PPF_LAZYSTART    | bool                        | Lazy start whether to wait for `pp-finder start` or not, defaults to `false` |
-| PPF_LOGFILE      | string                      | File to log gadgets to                                                       |
-| PPF_POLLUTABLES  | string[]                    | Pollutable objects. Defaults to `["Object"]`                                 |
-| PPF_AGENT        | 'loader', 'node','browser'  | Agent to use. Defaults to `loader`                                           |
-| PPF_TRANSFORMERS | string[]                    | Transformers to use. Defaults to `all`                                       |
+You can override the behaviour of PP finder using environment variables:
 
+| Environment        | Type              | Description                                                                  |
+| :----------------- | :---------------- | :--------------------------------------------------------------------------- |
+| `PPF_WRAPPER_NAME` | string            | Wrapper name, defaults to `ø`                                                |
+| `PPF_LOGONCE`      | bool              | Only log each finding once, defaults to `false`                              |
+| `PPF_COLOR`        | bool              | Disable colorization, defaults to `true`                                     |
+| `PPF_LAZYSTART`    | bool              | Lazy start whether to wait for `pp-finder start` or not, defaults to `false` |
+| `PPF_POLLUTABLES`  | string[]          | Comma separated list of pollutable objects. Defaults to `["Object"]`         |
+| `PPF_AGENT`        | 'node', 'browser' | Agent to use for compilation only. Defaults to `node`                        |
+| `PPF_TRANSFORMERS` | string[]          | Comma separated list of transformers. Defaults to `all`                      |
+| `PPF_SKIP`         | string (regex)    | Skip packages that match the regex ( loader only )                           |
 
 ### PPF_TRANSFORMERS
 
@@ -121,34 +152,66 @@ const defaultTransformers = [
 ];
 ```
 
+
 Example (Only forIn and elem are used): 
 
 ```shell
 $ PPF_TRANSFORMERS=forInStatement,elementAccess node --loader pp-finder ../targets/express/index.js
-[PP][forIn] _ [...]/targets/express/node_modules/debug/src/debug.js 47:13
-[PP][forIn] _ [...]/targets/express/node_modules/safe-buffer/index.js 8:19
-[PP][forIn] _ [...]/targets/express/node_modules/debug/src/debug.js 47:13
-[PP][forIn] _ [...]/targets/express/node_modules/mime/mime.js 22:20
-[PP][elem]  0 [...]/targets/express/node_modules/mime/mime.js 35:36
-[PP][elem]  0 [...]/targets/express/node_modules/mime/mime.js 35:36
-[PP][elem]  0 [...]/targets/express/node_modules/mime/mime.js 35:36
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+[PP][forIn] "_" at node_modules/safe-buffer/index.js:8:19
+[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+[PP][forIn] "_" at node_modules/mime/mime.js:22:20
+[PP][elem] "0" at node_modules/mime/mime.js:35:36
+[PP][elem] "0" at node_modules/mime/mime.js:35:36
+[PP][elem] "0" at node_modules/mime/mime.js:35:36
+[PP][elem] "0" at node_modules/mime/mime.js:35:36
+[PP][elem] "0" at node_modules/mime/mime.js:35:36
+[PP][elem] "0" at node_modules/mime/mime.js:35:36
 ```
 
-## Dev
+## Advanced Usage
 
-```shell
-$ yarn dev
-$ node --loader ./dist/loader.cjs file.js
+### Lazy start
+
+Most of the time, you only want gadget that are reachable after the pollution point. You can tell pp-finder to start lazely and wait for the `"pp-finder start";` instruction
+
+```javascript
+const express = require('express')
+const app = express()
+const port = 3000
+
+"pp-finder start";
+
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
+
 ```
+
+This way you won't see any gadgets found during the loading of express and its dependencies. 
+
+Also, you can use the `"pp-finder stop";` instruction to stop the gadget finder.
+
+> Warning, keep in mind that the start/stop instructions will only affect the logging, but not the instrumentation
+
+> If you need to stop pp-finder from instrumenting specific file/package, use the skip option with a regex instead.
 
 ## Tests
 
 Tests indicate what the library handles in terms of AST visitors:
 
 ```shell
-$ yarn test
+$ make test
 Building loader
-Building compiler
 Starting tests
 Running test: arrowFunctionDeclaration.test.js
 Running test: assignation.test.js

@@ -7,9 +7,9 @@ export default defineTransformer('expressionStatement', (node, utils) => {
   if (!ts.isExpressionStatement(node) || !ts.isStringLiteral(node.expression)) {
     return null;
   }
-  if (node.expression.text === "start pp-finder") {
+  if (node.expression.text === "pp-finder start") {
     return utils.createPPFCall("start", node);
-  } else if (node.expression.text === "stop pp-finder") {
+  } else if (node.expression.text === "pp-finder stop") {
     return utils.createPPFCall("stop", node);
   } else {
     return null;
