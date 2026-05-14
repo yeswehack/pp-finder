@@ -1,4 +1,5 @@
 import child_process from "child_process";
+import path from "path";
 import { command, option, optional, positional, rest, string } from "cmd-ts";
 
 export default command({
@@ -24,8 +25,8 @@ export default command({
       type: optional(string),
       long: "loader",
       short: "l",
-      defaultValue: () => "pp-finder",
-      description: "loader to use: default is pp-finder",
+      defaultValue: () => path.join(__dirname, "loader.cjs"),
+      description: "loader to use: defaults to the built-in loader.cjs",
     }),
   },
   async handler({ cmd, args, config: configPath, loader }) {
@@ -33,7 +34,7 @@ export default command({
       env: {
         ...process.env,
         PPF_CONFIG: configPath,
-        NODE_OPTIONS: `--experimental-loader ${JSON.stringify(loader)} --no-warnings`,
+        NODE_OPTIONS: `--require ${JSON.stringify(path.join(__dirname, "register.cjs"))} --experimental-loader ${JSON.stringify(loader)} --no-warnings`,
       },
       stdio: 'inherit',
       shell: true,

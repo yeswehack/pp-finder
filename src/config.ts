@@ -53,7 +53,7 @@ export const jsonParser = z
     transformers: transformersParser.describe("Transformers to use"),
     skip: z.string().default("").describe("Skip files with this pattern"),
   })
-  .default({})
+  .prefault({})
   .describe("PP Finder configuration file");
 
 export type PPFConfig = z.infer<typeof jsonParser>;

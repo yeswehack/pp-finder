@@ -3,6 +3,10 @@
   "version": "2.0.1",
   "packageManager": "yarn@4.1.1",
   "main": "dist/loader.cjs",
+  "exports": {
+    ".": "./dist/loader.cjs",
+    "./register": "./dist/register.cjs"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/yeswehack/pp-finder.git"
@@ -19,21 +23,20 @@
     "cli": "ts-node ./src/cli.ts"
   },
   "dependencies": {
-    "@inquirer/select": "^2.4.5",
-    "cmd-ts": "^0.13.0",
+    "@inquirer/select": "^5.1.5",
+    "cmd-ts": "^0.15.0",
     "ncc": "^0.3.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4",
-    "zod": "^3.23.8"
+    "typescript": "^6.0.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/mocha": "^10.0.7",
-    "@types/node": "^22.0.0",
-    "@vercel/ncc": "^0.38.1",
-    "mocha": "^10.7.0",
-    "typescript-json-schema": "^0.64.0",
-    "zod-to-json-schema": "^3.23.2"
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.0.0",
+    "@vercel/ncc": "patch:@vercel/ncc@npm%3A0.38.4#~/.yarn/patches/@vercel-ncc-npm-0.38.4-c7f6d7c3e6.patch",
+    "mocha": "^11.7.5",
+    "typescript-json-schema": "^0.67.2"
   },
   "bin": "./dist/cli.cjs"
 }

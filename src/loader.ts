@@ -1,4 +1,3 @@
-import agents from "./agents";
 import { compile } from "./compiler";
 import { loadConfig } from "./config";
 type Format = "builtin" | "commonjs" | "dynamic" | "json" | "module" | "wasm";
@@ -21,8 +20,6 @@ type LoadHook = (
   nextLoad: (url: string, context: LoadContext) => Promise<LoadReturn>
 ) => Promise<LoadReturn>;
 
-type GlobalPreloadHook = () => string;
-
 const config = loadConfig();
 
 const skipRegex = config.skip && new RegExp(config.skip);
@@ -36,13 +33,4 @@ export const load: LoadHook = async function (url, context, nextLoad) {
     r.source = compile(config, r.source.toString());
   }
   return r;
-};
-
-export const globalPreload: GlobalPreloadHook = function () {
-  const context = JSON.stringify(config);
-  return `globalThis.${config.wrapperName} = (
-  ${agents.loader})(${context}, 
-  (${agents.utils}),
-  ${JSON.stringify(__dirname)}
-);`;
 };

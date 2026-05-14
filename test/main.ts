@@ -27,7 +27,7 @@ async function runTest(testPath: string, resultPath: string) {
   const result = child_process
     .execFileSync(
       "node",
-      ["--loader", "./dist/loader.cjs", "--no-warnings", testPath],
+      ["--require", "./dist/register.cjs", "--loader", "./dist/loader.cjs", "--no-warnings", testPath],
       {
         env: {
           ...process.env,

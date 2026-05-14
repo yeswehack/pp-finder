@@ -20,7 +20,7 @@ export function compile(context: PPFConfig, source: string) {
     const utils: PPTransformerUtils = {
       config: context,
       visit<T extends ts.Node>(node: T) {
-        return ts.visitNode<T>(node, visit);
+        return ts.visitNode(node, visit) as T;
       },
       createPPFCall(name, target, ...params) {
         const pos = ts.getLineAndCharacterOfPosition(tree, target.getStart());
@@ -49,7 +49,7 @@ export function compile(context: PPFConfig, source: string) {
       return ts.visitEachChild(node, visit, ctx);
     };
 
-    return (node) => ts.visitNode(node, visit);
+    return (node) => ts.visitNode(node, visit) as ts.SourceFile;
   };
 
   const transformedTree = ts.transform(tree, [transformer]);

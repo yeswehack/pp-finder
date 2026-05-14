@@ -19,38 +19,28 @@ export default defineAgent((config, createLogger, root: string) => {
   const skipRegex = config.skip && new RegExp(config.skip);
 
   function processHookRequire() {
-    const _require = Module.prototype.require;
-    const _wrap = Module.wrap;
+    // Use _compile (which receives the filename) instead of Module.wrap (which
+    // doesn't), so we can exclude pp-finder's own dist files. This prevents
+    // loader.cjs from being instrumented when --require runs before --loader
+    // in Node 22+ startup ordering.
+    const _compile = (Module.prototype as any)._compile;
+    const rootDir = root + Path.sep;
 
-    // Modify the require function to compile the module before loading it
-    const ppfRequire = function (this: typeof Module, id: string) {
-      if (
-        Module.builtinModules.includes(id) ||
-        (skipRegex && skipRegex.test(id))
-      ) {
-        return _require.apply(this, [id]);
+    (Module.prototype as any)._compile = function (
+      content: string,
+      filename: string
+    ) {
+      if (!filename.startsWith(rootDir) && (!skipRegex || !skipRegex.test(filename))) {
+        content = compile(config, content);
       }
-
-      Module.wrap = function (script: string) {
-        return _wrap(compile(config, script));
-      };
-      return _require.apply(this, [id]);
+      return _compile.call(this, content, filename);
     };
-
-    Module.wrap = function (script: string) {
-      return _wrap(compile(config, script));
-    };
-
-    Module.prototype.require = Object.assign(
-      ppfRequire,
-      Module.prototype.require
-    );
   }
   processHookRequire();
 
   const colorMap: Record<string, string> = {
     reset: "\x1b[0m",
-    PP: "\x1b[34m",
+    PP: "\x1b[1;34m",
     bind: "\x1b[35m",
     elem: "\x1b[32m",
     forIn: "\x1b[31m",
@@ -59,15 +49,9 @@ export default defineAgent((config, createLogger, root: string) => {
     key: "\x1b[0;33m",
   } as const;
 
-  const format = (color: keyof typeof colorMap, text: string, wraps = "") => {
-    const prefix = wraps.length == 2 ? wraps[0] : "";
-    const suffix = wraps.length == 2 ? wraps[1] : "";
-
-    if (!config.color) {
-      return `${prefix}${text}${suffix}`;
-    }
-
-    return `${prefix}${colorMap[color]}${text}${colorMap.reset}${suffix}`;
+  const format = (color: keyof typeof colorMap, text: string) => {
+    if (!config.color) return text;
+    return `${colorMap[color]}${text}${colorMap.reset}`;
   };
 
   return createLogger(
@@ -79,10 +63,7 @@ export default defineAgent((config, createLogger, root: string) => {
     ({ op, key, path, pos }) => {
       const shortPath = Path.relative(process.cwd(), path);
       const loc = `${pos[0]}:${pos[1]}`;
-      return [`${format("PP", "PP", "[]")}${format(op, op, "[]")} ${format(
-        "key",
-        JSON.stringify(key || "_")
-      )} at ${shortPath}:${loc}`];
+      return [`${format("PP", "PP")}  ${format(op, op.padEnd(5))}  ${format("key", JSON.stringify(key || "_"))}  ${shortPath}:${loc}`];
     }
   );
 });

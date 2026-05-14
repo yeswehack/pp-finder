@@ -18,7 +18,6 @@ export default defineAgent((config, createLogger) => {
     key: "light-dark(#7F6D00, #C4A000)",
   } as const;
 
-
   return createLogger(
     config,
     {
@@ -27,15 +26,15 @@ export default defineAgent((config, createLogger) => {
     },
     ({ op, key, path, pos }) => {
       const loc = `${pos[0]}:${pos[1]}`;
+      const paddedOp = op.padEnd(5);
       return [
-        `[%cPP%c][%c${op}%c] %c${JSON.stringify(
-          key || "_"
-        )}%cat ${path} ${loc}`,
-        `color: ${colorMap.PP}`,
+        `%cPP%c  %c${paddedOp}%c  %c${JSON.stringify(key || "_")}%c  ${path}:${loc}`,
+        `font-weight:bold; color:${colorMap.PP}`,
         "",
-        `color: ${colorMap[op]}`,
+        `color:${colorMap[op]}`,
         "",
-        `color: ${colorMap.key}`,
+        `color:${colorMap.key}`,
+        "",
       ];
     }
   );
