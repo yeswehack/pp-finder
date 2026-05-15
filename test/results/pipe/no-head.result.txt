@@ -1,0 +1,5 @@
+<body>
+<script data-ppf="agent"></script>
+<script>ø.prop([1, 6], ({}), "y").y;
+</script>
+</body>

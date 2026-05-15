@@ -52,6 +52,10 @@ export const jsonParser = z
     agent: agentParser.default("loader").describe("Agent to use"),
     transformers: transformersParser.describe("Transformers to use"),
     skip: z.string().default("").describe("Skip files with this pattern"),
+    extensionMap: z
+      .record(z.string(), z.enum(["html", "js"]))
+      .default({})
+      .describe("Map of file extensions to pipe types (e.g. { \".asp\": \"html\" })"),
   })
   .prefault({})
   .describe("PP Finder configuration file");
@@ -117,6 +121,7 @@ function mergeConfigs(...configs: PPFPartialConfig[]): PPFConfig {
       wrapperName: config.wrapperName ?? acc.wrapperName,
       transformers: config.transformers ?? acc.transformers,
       skip: config.skip ?? acc.skip,
+      extensionMap: (config.extensionMap as Record<string, "html" | "js"> | undefined) ?? acc.extensionMap,
     };
   }, defaultConfig);
 }

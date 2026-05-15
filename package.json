@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.0.0",
+    "@types/node": "^25.8.0",
     "@vercel/ncc": "patch:@vercel/ncc@npm%3A0.38.4#~/.yarn/patches/@vercel-ncc-npm-0.38.4-c7f6d7c3e6.patch",
     "mocha": "^11.7.5",
     "typescript-json-schema": "^0.67.2"

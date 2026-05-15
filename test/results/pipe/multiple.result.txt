@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script data-ppf="agent"></script>
+<script>var x = ø.prop([1, 14], ({}), "a").a;
+</script>
+</head>
+<body>
+<script type="text/javascript">var y = ø.prop([1, 14], ({}), "b").b;
+</script>
+<script type="text/template">{{not_instrumented}}</script>
+</body>
+</html>

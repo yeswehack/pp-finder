@@ -64,32 +64,32 @@ node --require pp-finder/register --loader pp-finder --no-warnings index.js
 **4. Observe the output:**
 
 ```
-[PP][prop] "prepareStackTrace" at node_modules/depd/index.js:384:20
-[PP][prop] "noDeprecation" at node_modules/depd/index.js:154:15
-[PP][prop] "NO_DEPRECATION" at node_modules/depd/index.js:159:25
-[PP][prop] "traceDeprecation" at node_modules/depd/index.js:170:15
-[PP][prop] "TRACE_DEPRECATION" at node_modules/depd/index.js:175:25
-[PP][prop] "hasOwnProperty" at node_modules/merge-descriptors/index.js:22:39
-[PP][prop] "type" at node_modules/debug/src/index.js:6:47
-[PP][prop] "DEBUG_FD" at node_modules/debug/src/node.js:61:31
-[PP][prop] "DEBUG" at node_modules/debug/src/node.js:157:22
-[PP][isIn] "colors" at node_modules/debug/src/node.js:76:22
-[PP][forIn] "_" at node_modules/debug/src/debug.js:47:13
+PP  prop   "prepareStackTrace"  node_modules/depd/index.js:384:20
+PP  prop   "noDeprecation"      node_modules/depd/index.js:154:15
+PP  prop   "NO_DEPRECATION"     node_modules/depd/index.js:159:25
+PP  prop   "traceDeprecation"   node_modules/depd/index.js:170:15
+PP  prop   "TRACE_DEPRECATION"  node_modules/depd/index.js:175:25
+PP  prop   "hasOwnProperty"     node_modules/merge-descriptors/index.js:22:39
+PP  prop   "type"               node_modules/debug/src/index.js:6:47
+PP  prop   "DEBUG_FD"           node_modules/debug/src/node.js:61:31
+PP  prop   "DEBUG"              node_modules/debug/src/node.js:157:22
+PP  isIn   "colors"             node_modules/debug/src/node.js:76:22
+PP  forIn  "_"                  node_modules/debug/src/debug.js:47:13
 ```
 
 Send a request to the server (`curl http://localhost:3000`) and more gadgets appear:
 
 ```
-[PP][elem] "filename" at node_modules/ejs/lib/utils.js:167:23
-[PP][elem] "async" at node_modules/ejs/lib/utils.js:167:23
-[PP][prop] "scope" at node_modules/ejs/lib/ejs.js:387:20
-[PP][forIn] "_" at node_modules/ejs/lib/utils.js:243:17
-[PP][prop] "openDelimiter" at node_modules/ejs/lib/ejs.js:523:57
-[PP][prop] "closeDelimiter" at node_modules/ejs/lib/ejs.js:524:59
-[PP][prop] "delimiter" at node_modules/ejs/lib/ejs.js:525:49
-[PP][isIn] "ctime" at node_modules/etag/index.js:112:16
-[PP][elem] "if-modified-since" at node_modules/fresh/index.js:35:34
-[PP][elem] "if-none-match" at node_modules/fresh/index.js:36:30
+PP  elem   "filename"          node_modules/ejs/lib/utils.js:167:23
+PP  elem   "async"             node_modules/ejs/lib/utils.js:167:23
+PP  prop   "scope"             node_modules/ejs/lib/ejs.js:387:20
+PP  forIn  "_"                 node_modules/ejs/lib/utils.js:243:17
+PP  prop   "openDelimiter"     node_modules/ejs/lib/ejs.js:523:57
+PP  prop   "closeDelimiter"    node_modules/ejs/lib/ejs.js:524:59
+PP  prop   "delimiter"         node_modules/ejs/lib/ejs.js:525:49
+PP  isIn   "ctime"             node_modules/etag/index.js:112:16
+PP  elem   "if-modified-since" node_modules/fresh/index.js:35:34
+PP  elem   "if-none-match"     node_modules/fresh/index.js:36:30
 [...]
 ```
 
@@ -133,6 +133,32 @@ For each call, it walks the prototype chain of the target object and applies two
 Object.create(null).exec // ✗ silent — no prototype chain at all
 ```
 
+### HTML compilation
+
+The `pipe` command extends instrumentation to HTML pages. When the input is detected as HTML, PP-Finder:
+
+1. **Parses `<script>` tags** — only inline scripts are instrumented; external scripts (`src="..."`) are left untouched.
+2. **Skips non-JS script types** — `type="text/template"`, `type="application/json"`, etc. are passed through verbatim. `type="module"` is treated as JavaScript.
+3. **Injects the browser agent** — a `<script data-ppf="agent">` block is inserted right after the `<head>` opening tag (or before the first `<script>` if there is no `<head>`). This initializes `globalThis.ø` before any instrumented code runs.
+
+```html
+<!-- Original -->
+<head></head>
+<body>
+  <script>if (options.exec) spawn(options.exec);</script>
+</body>
+
+<!-- After instrumentation (simplified) -->
+<head>
+  <script data-ppf="agent">if (!globalThis.ø) globalThis.ø = (browserAgent)(config, createLogger, "");</script>
+</head>
+<body>
+  <script>if (globalThis.ø.prop(options, "exec")) spawn(globalThis.ø.prop(options, "exec"));</script>
+</body>
+```
+
+The browser agent uses `console.log` with DevTools `%c` CSS styling and extracts source locations from `Error().stack` using the pattern `/(http[^ (]+?):\d+:\d+/`, so logged paths are real HTTP URLs as seen in the browser.
+
 ### Startup sequence
 
 When you run `pp-finder run -- node app.js`, the following `NODE_OPTIONS` are set for the child process:
@@ -154,10 +180,15 @@ Subcommands:
   compile  Compile a specified file
   run      Run a command with PP-Finder instrumentation
            Example: pp-finder run -c ./pp-finder.json -- node test.js
+  pipe     Instrument JS/HTML from stdin and write to stdout (for Burp Piper)
+           Example: pp-finder pipe --content-type "text/html" --url "http://example.com/"
 
 Options:
-  -c, --config  Path to configuration file (default: ./pp-finder.json)
-  -l, --loader  Loader to use (default: pp-finder)
+  -c, --config        Path to configuration file (default: ./pp-finder.json)
+  -l, --loader        Loader to use (default: pp-finder)
+  -t, --type          Force pipe input type: "html" or "js"
+      --content-type  Content-Type header value (used for type detection)
+      --url           URL of the resource (used for type detection and shown in logs)
 ```
 
 ## Configuration
@@ -184,6 +215,14 @@ All options can also be set via environment variables, which take precedence ove
 | `PPF_AGENT`        | enum           | `node`   | Agent to use for compilation: `node`, `browser`, or `loader` |
 | `PPF_TRANSFORMERS` | string (csv)   | *(all)*  | Comma-separated list of transformers to enable               |
 | `PPF_SKIP`         | string (regex) | *(none)* | Skip files whose path matches this regex (loader mode only)  |
+
+### Config-file-only options
+
+These options can only be set in the JSON config file (not via environment variables):
+
+| Field          | Type                      | Default | Description                                                    |
+| :------------- | :------------------------ | :------ | :------------------------------------------------------------- |
+| `extensionMap` | `{ [ext: string]: "html" \| "js" }` | `{}` | Override pipe type detection for specific file extensions (e.g. `{ ".asp": "html" }`) |
 
 ### Transformers
 
@@ -222,7 +261,7 @@ Instruments dot-notation property reads. Fires when `y` is not an own property o
 ```
 
 ```
-[PP][prop] "y" at index.js:1:4
+PP  prop   "y"  index.js:1:4
 ```
 
 ---
@@ -239,7 +278,7 @@ Instruments bracket-notation property reads. Same semantics as `propertyAccess` 
 ```
 
 ```
-[PP][elem] "y" at index.js:1:4
+PP  elem   "y"  index.js:1:4
 ```
 
 ---
@@ -256,8 +295,8 @@ const { y: { d } } = { y: {} };
 ```
 
 ```
-[PP][bind] "a" at index.js:1:15
-[PP][bind] "y.d" at index.js:2:5
+PP  bind   "a"    index.js:1:15
+PP  bind   "y.d"  index.js:2:5
 ```
 
 ---
@@ -274,8 +313,8 @@ Instruments destructuring in assignment expressions (outside of a variable decla
 ```
 
 ```
-[PP][bind] "y" at index.js:1:10
-[PP][bind] "y.z" at index.js:2:5
+PP  bind   "y"    index.js:1:10
+PP  bind   "y.z"  index.js:2:5
 ```
 
 ---
@@ -292,8 +331,8 @@ Instruments destructuring parameters in arrow functions. Fires on each call with
 ```
 
 ```
-[PP][bind] "y" at index.js:1:3
-[PP][bind] "y" at index.js:2:3
+PP  bind   "y"  index.js:1:3
+PP  bind   "y"  index.js:2:3
 ```
 
 ---
@@ -310,8 +349,8 @@ f({}, 0, {});
 ```
 
 ```
-[PP][bind] "y" at index.js:1:13
-[PP][bind] "z" at index.js:1:23
+PP  bind   "y"  index.js:1:13
+PP  bind   "z"  index.js:1:23
 ```
 
 ---
@@ -328,7 +367,7 @@ f({});
 ```
 
 ```
-[PP][bind] "y" at index.js:1:20
+PP  bind   "y"  index.js:1:20
 ```
 
 ---
@@ -345,7 +384,7 @@ for (let k in Object.create(null)) {} // does NOT trigger — null prototype, no
 ```
 
 ```
-[PP][forIn] "_" at index.js:1:14
+PP  forIn  "_"  index.js:1:14
 ```
 
 > The key shown is always `_` — it indicates the loop target is pollutable, not a specific key name.
@@ -364,7 +403,7 @@ Instruments the `in` operator. Fires when the key is not an own property of the 
 ```
 
 ```
-[PP][isIn] "y" at index.js:1:8
+PP  isIn   "y"  index.js:1:8
 ```
 
 ---
@@ -414,6 +453,45 @@ Enable lazy start via the config file or environment variable:
 ```shell
 PPF_LAZYSTART=true pp-finder run -- node index.js
 ```
+
+### Burp Suite / Piper
+
+The `pipe` command reads JS or HTML from stdin, instruments it with the browser agent, and writes the result to stdout. It is designed to work with [Piper](https://portswigger.net/bappstore/e4e0f6c4f0274754917dcb5f4937bb9e), a Burp extension that can pipe HTTP response bodies through external commands on the fly.
+
+#### How it works
+
+Piper's **HTTP Listener** feature intercepts HTTP responses and replaces the body with the stdout of an external command. PP-Finder receives the raw response body on stdin and returns the instrumented version. The browser then executes the instrumented code, and gadgets appear in the DevTools console in real time.
+
+The browser agent extracts the source URL automatically from `Error().stack` — no wrapper script or `--url` flag is needed.
+
+#### Setup
+
+**Prerequisites:** `pp-finder` must be in the PATH of the user running Burp Suite. If you installed it globally (`npm install -g pp-finder` or `npm link`), this is already the case.
+
+**1. Install Piper** from the BApp Store inside Burp Suite (`Extensions → BApp Store → Piper`).
+
+**2. Import the Piper config.** Download [pp-finder.piper.yaml](pp-finder.piper.yaml) from this repository, then in Burp go to `Piper → Import → From file`.
+
+**3. Enable the rules.** Piper disables all rules imported via the GUI by default. Go to `Piper → HTTP Listeners`, check the box next to both rules to enable them.
+
+**4. Browse through Burp Proxy.** Open the browser through Burp's built-in browser (or configure your browser to use Burp as a proxy). Every HTML page and JavaScript file will be instrumented transparently. Open DevTools → Console to see gadget findings as pages load.
+
+#### What to expect
+
+Gadgets appear in the console color-coded by type:
+
+```
+PP  prop   "exec"  https://example.com/app.js:42:15
+PP  elem   "x-forwarded-for"  https://example.com/page.html:18:3
+```
+
+The logged path is the real HTTP URL extracted from the browser's stack trace — it points directly to the file and line where the potentially pollutable access happens.
+
+#### Limitations
+
+- **External scripts** referenced via `<script src="...">` are not instrumented by the HTML rule — they are fetched separately and hit the JS rule independently.
+- **Cached responses** served from the browser cache bypass Piper entirely. Use a hard reload (`Ctrl+Shift+R`) or disable caching in DevTools to force all resources through the proxy.
+- **Minified code** produces accurate line/column numbers from the original minified source. Source maps are not applied.
 
 ## Development
 

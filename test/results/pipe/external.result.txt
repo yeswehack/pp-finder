@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script data-ppf="agent"></script></head>
+<body>
+<script src="/app.js"></script>
+<script>ø.prop([1, 6], ({}), "z").z;
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@ import { run as runCli, subcommands } from "cmd-ts";
 import compile from "./cmds/compile";
 import run from "./cmds/run";
 import init from "./cmds/init";
+import pipe from "./cmds/pipe";
 
 const app = subcommands({
   name: "PP Finder",
@@ -12,6 +13,7 @@ const app = subcommands({
     init,
     compile,
     run,
+    pipe,
   },
 });
 

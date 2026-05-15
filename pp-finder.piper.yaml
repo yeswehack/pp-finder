@@ -1,0 +1,21 @@
+httpListeners:
+  - name: PP-Finder HTML
+    scope: response
+    prefix: [pp-finder, pipe, --type, html]
+    inputMethod: stdin
+    filter:
+      header:
+        header: Content-Type
+        regex:
+          pattern: 'text/html'
+          flags: [case insensitive]
+  - name: PP-Finder JS
+    scope: response
+    prefix: [pp-finder, pipe, --type, js]
+    inputMethod: stdin
+    filter:
+      header:
+        header: Content-Type
+        regex:
+          pattern: '(text|application)/(x-)?javascript|application/ecmascript'
+          flags: [case insensitive]
